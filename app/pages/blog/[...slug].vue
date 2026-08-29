@@ -37,7 +37,7 @@ useHead(() => ({ title }))
 </script>
 
 <template>
-  <article v-if="doc">
+  <article v-if="doc" class="card px-6 py-7 md:px-9 md:py-8">
     <div class="article-meta">
       <span class="tag">{{ category }}</span>
     </div>

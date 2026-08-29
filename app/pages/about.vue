@@ -9,8 +9,10 @@ useHead({ title: '关于' })
 <template>
   <div>
     <h1 class="page-title">关于本站</h1>
-    <div class="markdown-content" style="margin-top: 16px">
-      <ContentRenderer v-if="about" :value="about" />
+    <div class="card px-6 py-7 md:px-9 md:py-8">
+      <div class="markdown-content">
+        <ContentRenderer v-if="about" :value="about" />
+      </div>
     </div>
   </div>
 </template>

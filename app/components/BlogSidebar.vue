@@ -24,7 +24,7 @@ const currentCategory = computed(() =>
 
 <template>
   <aside class="blog-sidebar">
-    <div class="side-card">
+    <div class="card side-card">
       <h3>文章分类</h3>
       <ul>
         <li>
@@ -44,7 +44,7 @@ const currentCategory = computed(() =>
         </li>
       </ul>
     </div>
-    <div class="side-card" style="margin-top: 16px">
+    <div class="card side-card">
       <h3>导航</h3>
       <ul>
         <li><NuxtLink to="/about">关于本站</NuxtLink></li>
