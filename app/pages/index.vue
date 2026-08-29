@@ -28,12 +28,12 @@ const categories = computed(() => Object.keys(grouped.value))
     </p>
 
     <section v-for="cat in categories" :key="cat" class="category-block">
-      <h2>
+      <h2 class="category-title">
         <NuxtLink :to="`/category/${cat}`">{{ cat }}</NuxtLink>
       </h2>
-      <ul class="article-list">
-        <li v-for="post in grouped[cat]" :key="post.id">
-          <NuxtLink :to="articleHref(post)">
+      <ul class="list-group article-list">
+        <li v-for="post in grouped[cat]" :key="post.id" class="list-row">
+          <NuxtLink :to="articleHref(post)" class="list-link">
             {{ articleTitle(post) }}
           </NuxtLink>
         </li>

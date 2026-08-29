@@ -21,12 +21,17 @@ const list = computed(() =>
 
 <template>
   <div>
-    <h1 class="page-title">分类：{{ rawCategory }}</h1>
-    <p class="page-subtitle">该分类下共 {{ list.length }} 篇文章。</p>
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">分类：{{ rawCategory }}</h1>
+        <p class="page-subtitle">该分类下共 {{ list.length }} 篇文章。</p>
+      </div>
+      <NuxtLink to="/" class="btn btn-ghost">← 全部文章</NuxtLink>
+    </div>
 
-    <ul class="article-list">
-      <li v-for="post in list" :key="post.id">
-        <NuxtLink :to="articleHref(post)">
+    <ul class="list-group article-list">
+      <li v-for="post in list" :key="post.id" class="list-row">
+        <NuxtLink :to="articleHref(post)" class="list-link">
           {{ articleTitle(post) }}
         </NuxtLink>
       </li>

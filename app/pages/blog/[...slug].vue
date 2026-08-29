@@ -37,11 +37,11 @@ useHead(() => ({ title }))
 </script>
 
 <template>
-  <article v-if="doc" class="card px-6 py-7 md:px-9 md:py-8">
+  <article v-if="doc" class="card">
     <div class="article-meta">
-      <span class="tag">{{ category }}</span>
+      <NuxtLink :to="`/category/${category}`" class="chip chip-blue">{{ category }}</NuxtLink>
     </div>
-    <h1 class="page-title" style="margin-bottom: 16px">{{ title }}</h1>
+    <h1 class="page-title" style="margin-bottom: 18px">{{ title }}</h1>
 
     <div class="markdown-content">
       <ContentRenderer :value="doc" />

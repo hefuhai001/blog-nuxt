@@ -10,7 +10,7 @@ function toggle() {
 
 <template>
   <button
-    class="theme-toggle"
+    class="icon-btn"
     :aria-label="isDark ? '切换到白天模式' : '切换到黑夜模式'"
     :title="isDark ? '切换到白天模式' : '切换到黑夜模式'"
     @click="toggle"
