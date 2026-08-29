@@ -1,23 +1,70 @@
 @import "tailwindcss";
 
-/* ============ 二次元主题 Tokens（樱粉 × 奶油白） ============ */
+/* ============ 二次元主题 Tokens（樱粉 × 奶油白 / 深色） ============ */
 @theme {
-  --color-cream: #fff9f5;
-  --color-paper: #fffdfb;
-  --color-cocoa: #6d4b58;
-  --color-sakura: #ffd6e2;
-  --color-sakura-deep: #f8a8c2;
-  --color-blossom: #ff7ea3;
-  --color-sky: #d9ebff;
-  --color-sky-deep: #7fb3f5;
-  --color-lemon: #ffe6a8;
-  --color-ink: #4a3f47;
-  --color-ink-soft: #93828c;
-  --color-line: #f7d7e3;
-
   --font-display: "Baloo 2", "Varela Round", "YouYuan", "PingFang SC", sans-serif;
   --font-body: "Hiragino Maru Gothic ProN", "Yu Gothic", "PingFang SC",
     "Microsoft YaHei", sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  --bg-cream: #fff9f5;
+  --bg-paper: #fffdfb;
+  --ink: #4a3f47;
+  --ink-soft: #93828c;
+  --cocoa: #6d4b58;
+  --line: #f7d7e3;
+  --blossom: #ff7ea3;
+  --sakura: #ffd6e2;
+  --grad-1: rgba(255, 184, 214, 0.45);
+  --grad-2: rgba(207, 228, 255, 0.6);
+  --grad-3: rgba(255, 230, 168, 0.35);
+  --card-shadow: rgba(183, 110, 121, 0.25);
+  --card-shadow-hover: rgba(248, 168, 194, 0.5);
+  --hover-bg: #fff0f4;
+  --count-bg: #fdeef3;
+  --cat-badge: linear-gradient(120deg, #ffd6e2, #ffe7ee);
+  --cat-shadow: rgba(248, 168, 194, 0.6);
+  --tag-bg: linear-gradient(120deg, #d9ebff, #eaf3ff);
+  --tag-color: #5a8bd4;
+  --quote-bg: #fff0f4;
+  --th-bg: #ffeef4;
+  --code-bg: #eff1f3;
+  --code-color: #cf222e;
+  --pre-bg: #f6f8fa;
+  --pre-fg: #1f2328;
+  --pre-border: #d0d7de;
+}
+
+html.dark {
+  color-scheme: dark;
+  --bg-cream: #191622;
+  --bg-paper: #241f2e;
+  --ink: #e8e0e7;
+  --ink-soft: #a396a3;
+  --cocoa: #f2dce4;
+  --line: #3b3142;
+  --blossom: #ff8fb2;
+  --sakura: #4a2c3c;
+  --grad-1: rgba(255, 126, 163, 0.1);
+  --grad-2: rgba(127, 179, 245, 0.1);
+  --grad-3: rgba(255, 230, 168, 0.06);
+  --card-shadow: rgba(0, 0, 0, 0.4);
+  --card-shadow-hover: rgba(255, 126, 163, 0.25);
+  --hover-bg: rgba(255, 126, 163, 0.1);
+  --count-bg: rgba(255, 126, 163, 0.12);
+  --cat-badge: linear-gradient(120deg, rgba(255, 126, 163, 0.2), rgba(255, 126, 163, 0.08));
+  --cat-shadow: rgba(255, 126, 163, 0.3);
+  --tag-bg: linear-gradient(120deg, rgba(127, 179, 245, 0.18), rgba(127, 179, 245, 0.08));
+  --tag-color: #9cc3f7;
+  --quote-bg: rgba(255, 126, 163, 0.08);
+  --th-bg: rgba(255, 126, 163, 0.12);
+  --code-bg: rgba(207, 34, 46, 0.15);
+  --code-color: #ff7b72;
+  --pre-bg: #0d1117;
+  --pre-fg: #e6edf3;
+  --pre-border: #30363d;
 }
 
 /* ============ 基础 ============ */
@@ -28,17 +75,18 @@ body {
 }
 
 body {
-  color: var(--color-ink);
+  color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.75;
-  background-color: var(--color-cream);
+  background-color: var(--bg-cream);
   background-image:
-    radial-gradient(1200px 500px at 15% -10%, rgba(255, 184, 214, 0.45), transparent 60%),
-    radial-gradient(1100px 500px at 95% 0%, rgba(207, 228, 255, 0.6), transparent 55%),
-    radial-gradient(900px 600px at 50% 120%, rgba(255, 230, 168, 0.35), transparent 60%);
+    radial-gradient(1200px 500px at 15% -10%, var(--grad-1), transparent 60%),
+    radial-gradient(1100px 500px at 95% 0%, var(--grad-2), transparent 55%),
+    radial-gradient(900px 600px at 50% 120%, var(--grad-3), transparent 60%);
   background-attachment: fixed;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
 a {
@@ -84,6 +132,10 @@ a {
 .scene-decor .p3 { top: 72%; left: 40%; animation-delay: 6s; }
 .scene-decor .p4 { top: 30%; left: 88%; animation-delay: 8s; }
 
+html.dark .scene-decor .bubble {
+  opacity: 0.3;
+}
+
 @keyframes floaty {
   0%, 100% { transform: translateY(0) translateX(0) scale(1); }
   50% { transform: translateY(-18px) translateX(6px) scale(1.06); }
@@ -121,7 +173,7 @@ a {
   font-size: 24px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: var(--color-cocoa);
+  color: var(--cocoa);
 }
 
 .site-name .logo-emoji {
@@ -136,6 +188,10 @@ a {
   font-size: 22px;
 }
 
+html.dark .site-name .logo-emoji {
+  background: linear-gradient(135deg, #3d2531, #4a2c3c);
+}
+
 .site-name b {
   background: linear-gradient(120deg, #ff7ea3, #f48fb1);
   -webkit-background-clip: text;
@@ -143,17 +199,49 @@ a {
   color: transparent;
 }
 
+.blog-header nav {
+  display: flex;
+  align-items: center;
+}
+
 .blog-header nav a {
   margin-left: 18px;
   font-size: 15px;
   font-weight: 600;
-  color: var(--color-ink-soft);
+  color: var(--ink-soft);
   transition: color 0.2s;
 }
 
 .blog-header nav a.router-link-active,
 .blog-header nav a:hover {
-  color: var(--color-blossom);
+  color: var(--blossom);
+}
+
+/* 主题切换按钮 */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-left: 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg-paper);
+  box-shadow: 0 4px 12px -6px var(--card-shadow);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-2px) rotate(-8deg);
+  border-color: #ffc6d8;
+  box-shadow: 0 8px 18px -8px var(--card-shadow-hover);
+}
+
+.theme-icon {
+  font-size: 18px;
+  line-height: 1;
 }
 
 /* ============ 主体网格 ============ */
@@ -175,21 +263,22 @@ a {
   padding: 26px 0 6px;
   text-align: center;
   font-size: 13px;
-  color: var(--color-ink-soft);
+  color: var(--ink-soft);
 }
 
 /* ============ 二次元贴纸卡片 ============ */
 .card {
-  background: var(--color-paper);
-  border: 1px solid var(--color-line);
+  background: var(--bg-paper);
+  border: 1px solid var(--line);
   border-radius: 22px;
-  box-shadow: 0 8px 26px -12px rgba(183, 110, 121, 0.25);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  box-shadow: 0 8px 26px -12px var(--card-shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease,
+    background-color 0.35s ease;
 }
 
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 34px -14px rgba(248, 168, 194, 0.5);
+  box-shadow: 0 16px 34px -14px var(--card-shadow-hover);
   border-color: #ffc6d8;
 }
 
@@ -198,7 +287,7 @@ a {
   font-family: var(--font-display);
   font-size: 30px;
   font-weight: 700;
-  color: var(--color-cocoa);
+  color: var(--cocoa);
   margin: 0 0 8px;
   display: flex;
   align-items: center;
@@ -207,12 +296,12 @@ a {
 
 .page-title::before {
   content: "✦";
-  color: var(--color-blossom);
+  color: var(--blossom);
   font-size: 24px;
 }
 
 .page-subtitle {
-  color: var(--color-ink-soft);
+  color: var(--ink-soft);
   font-size: 14px;
   margin: 0 0 24px;
 }
@@ -226,15 +315,15 @@ a {
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 700;
-  color: var(--color-cocoa);
+  color: var(--cocoa);
   display: inline-flex;
   align-items: center;
   gap: 8px;
   margin: 0 0 14px;
   padding: 4px 16px 4px 12px;
   border-radius: 999px;
-  background: linear-gradient(120deg, #ffd6e2, #ffe7ee);
-  box-shadow: 0 4px 12px -6px rgba(248, 168, 194, 0.6);
+  background: var(--cat-badge);
+  box-shadow: 0 4px 12px -6px var(--cat-shadow);
 }
 
 .category-block h2 a {
@@ -242,7 +331,7 @@ a {
 }
 
 .category-block h2 a:hover {
-  color: var(--color-blossom);
+  color: var(--blossom);
 }
 
 /* ============ 文章列表（卡片化） ============ */
@@ -255,18 +344,19 @@ a {
 }
 
 .article-list li {
-  background: var(--color-paper);
-  border: 1px solid var(--color-line);
+  background: var(--bg-paper);
+  border: 1px solid var(--line);
   border-radius: 16px;
   padding: 13px 18px;
-  box-shadow: 0 6px 18px -12px rgba(183, 110, 121, 0.2);
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 18px -12px var(--card-shadow);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.35s ease;
 }
 
 .article-list li:hover {
   transform: translateY(-3px);
   border-color: #ffc6d8;
-  box-shadow: 0 12px 26px -12px rgba(248, 168, 194, 0.45);
+  box-shadow: 0 12px 26px -12px var(--card-shadow-hover);
 }
 
 .article-list a {
@@ -275,7 +365,7 @@ a {
   gap: 10px;
   font-size: 15px;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--ink);
 }
 
 .article-list a::before {
@@ -288,7 +378,7 @@ a {
 }
 
 .article-list a:hover {
-  color: var(--color-blossom);
+  color: var(--blossom);
 }
 
 /* ============ 文章详情 ============ */
@@ -302,8 +392,8 @@ a {
   border-radius: 999px;
   font-size: 13px;
   font-weight: 600;
-  background: linear-gradient(120deg, #d9ebff, #eaf3ff);
-  color: #5a8bd4;
+  background: var(--tag-bg);
+  color: var(--tag-color);
   letter-spacing: 0.4px;
 }
 
@@ -318,12 +408,12 @@ a {
   flex: 1;
   max-width: 48%;
   padding: 14px 18px;
-  background: var(--color-paper);
-  border: 1px solid var(--color-line);
+  background: var(--bg-paper);
+  border: 1px solid var(--line);
   border-radius: 16px;
   font-size: 14px;
-  color: var(--color-ink-soft);
-  box-shadow: 0 6px 18px -12px rgba(183, 110, 121, 0.2);
+  color: var(--ink-soft);
+  box-shadow: 0 6px 18px -12px var(--card-shadow);
   transition: transform 0.2s, border-color 0.2s, color 0.2s;
 }
 
@@ -334,13 +424,13 @@ a {
 .article-nav a:hover {
   transform: translateY(-3px);
   border-color: #ffc6d8;
-  color: var(--color-blossom);
+  color: var(--blossom);
 }
 
 .article-nav .label {
   display: block;
   font-size: 12px;
-  color: var(--color-ink-soft);
+  color: var(--ink-soft);
   margin-bottom: 2px;
 }
 
@@ -361,13 +451,13 @@ a {
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 700;
-  color: var(--color-cocoa);
+  color: var(--cocoa);
   letter-spacing: 0.5px;
 }
 
 .side-card h3::after {
   content: " ✿";
-  color: var(--color-blossom);
+  color: var(--blossom);
 }
 
 .side-card ul {
@@ -389,13 +479,13 @@ a {
   border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-ink);
+  color: var(--ink);
   transition: background 0.15s, color 0.15s, transform 0.15s;
 }
 
 .side-card li a:hover {
-  background: #fff0f4;
-  color: var(--color-blossom);
+  background: var(--hover-bg);
+  color: var(--blossom);
   transform: translateX(2px);
 }
 
@@ -407,8 +497,8 @@ a {
 
 .side-card li a .count {
   font-size: 12px;
-  color: var(--color-ink-soft);
-  background: #fdeef3;
+  color: var(--ink-soft);
+  background: var(--count-bg);
   border-radius: 999px;
   padding: 0 9px;
   line-height: 19px;
@@ -422,7 +512,7 @@ a {
 /* ============ Markdown 正文排版 ============ */
 .markdown-content {
   font-size: 15.5px;
-  color: var(--color-ink);
+  color: var(--ink);
   overflow-wrap: break-word;
 }
 
@@ -430,7 +520,7 @@ a {
 .markdown-content h2,
 .markdown-content h3,
 .markdown-content h4 {
-  color: var(--color-cocoa);
+  color: var(--cocoa);
   font-weight: 700;
   line-height: 1.4;
   margin-top: 1.8em;
@@ -458,7 +548,7 @@ a {
 }
 
 .markdown-content a {
-  color: var(--color-blossom);
+  color: var(--blossom);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -480,16 +570,16 @@ a {
 .markdown-content blockquote {
   margin: 1em 0;
   padding: 0.6em 1em;
-  border-left: 4px solid var(--color-blossom);
-  background: #fff0f4;
+  border-left: 4px solid var(--blossom);
+  background: var(--quote-bg);
   border-radius: 8px;
-  color: var(--color-ink-soft);
+  color: var(--ink-soft);
 }
 
 .markdown-content hr {
   border: none;
   height: 1px;
-  background: var(--color-line);
+  background: var(--line);
   margin: 1.6em 0;
 }
 
@@ -501,21 +591,21 @@ a {
 
 .markdown-content th,
 .markdown-content td {
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--line);
   padding: 8px 12px;
   text-align: left;
 }
 
 .markdown-content th {
-  background: #ffeef4;
+  background: var(--th-bg);
   font-weight: 600;
 }
 
+/* GitHub 风格代码块（浅色/深色随主题切换） */
 .markdown-content pre {
-  color-scheme: light;
-  background: #f6f8fa !important;
-  color: #1f2328;
-  border: 1px solid #d0d7de;
+  background: var(--pre-bg);
+  color: var(--pre-fg);
+  border: 1px solid var(--pre-border);
   border-radius: 8px;
   padding: 16px;
   overflow-x: auto;
@@ -524,36 +614,22 @@ a {
   box-shadow: none;
 }
 
-/* GitHub 风格的代码块右上角语言徽章 */
-.markdown-content pre code[class*="language-"]::before {
-  content: attr(class);
-  display: block;
-  float: right;
-  font-size: 11px;
-  color: #656d76;
-  letter-spacing: 0.3px;
-  margin: -4px -2px 8px 12px;
-}
-
 .markdown-content code {
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
   font-size: 0.92em;
 }
 
 .markdown-content :not(pre) > code {
-  background: #eff1f3;
-  color: #cf222e;
+  background: var(--code-bg);
+  color: var(--code-color);
   padding: 2px 6px;
   border-radius: 6px;
 }
 
-.markdown-content pre {
-  /* 让 shiki 的 token 始终使用 GitHub Light 配色，不跟随系统深色 */
-  color-scheme: light;
-  --shiki-github-dark: var(--shiki-github-light);
-  --shiki-github-dark-bg: var(--shiki-github-light-bg);
-  --shiki-dark: var(--shiki-default);
-  --shiki-dark-bg: var(--shiki-default-bg);
+/* shiki 的 token 颜色由 @nuxt/content 根据 html.dark 自动切换（--shiki-default / --shiki-dark） */
+.markdown-content pre.shiki,
+.markdown-content .shiki {
+  background-color: var(--pre-bg);
 }
 
 /* ============ 响应式 ============ */
