@@ -1,12 +1,16 @@
 <script setup lang="ts">
+import { isArticle, categoryOf } from '~/composables/blog'
+
 const { data: posts } = await useAsyncData('sidebar-posts', () =>
   queryCollection('blog').order('path', 'ASC').all(),
 )
 
+const articles = computed(() => (posts.value ?? []).filter(isArticle))
+
 const categories = computed(() => {
   const map = new Map<string, number>()
-  for (const post of posts.value ?? []) {
-    const cat = (post.path.split('/')[2] || '未分类').toUpperCase()
+  for (const post of articles.value) {
+    const cat = categoryOf(post)
     map.set(cat, (map.get(cat) ?? 0) + 1)
   }
   return Array.from(map.entries()).map(([name, count]) => ({ name, count }))
@@ -14,7 +18,7 @@ const categories = computed(() => {
 
 const route = useRoute()
 const currentCategory = computed(() =>
-  (route.params.category as string | undefined)?.toUpperCase() ?? '',
+  (route.params.category as string | undefined) ?? '',
 )
 </script>
 
@@ -24,14 +28,14 @@ const currentCategory = computed(() =>
       <h3>文章分类</h3>
       <ul>
         <li>
-          <NuxtLink to="/" :class="{ active: route.path === '/' }" exact-active-class="">
+          <NuxtLink to="/" :class="{ active: route.path === '/' }">
             <span>全部文章</span>
-            <span class="count">{{ posts?.length ?? 0 }}</span>
+            <span class="count">{{ articles.length }}</span>
           </NuxtLink>
         </li>
         <li v-for="cat in categories" :key="cat.name">
           <NuxtLink
-            :to="`/category/${cat.name.toLowerCase()}`"
+            :to="`/category/${cat.name}`"
             :class="{ active: currentCategory === cat.name }"
           >
             <span>{{ cat.name }}</span>

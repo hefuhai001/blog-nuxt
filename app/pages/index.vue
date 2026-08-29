@@ -1,13 +1,17 @@
 <script setup lang="ts">
+import { isArticle, categoryOf, articleTitle, articleHref } from '~/composables/blog'
+
 const { data: posts } = await useAsyncData('blog-index', () =>
   queryCollection('blog').order('path', 'ASC').all(),
 )
 useHead({ title: '首页' })
 
+const articles = computed(() => (posts.value ?? []).filter(isArticle))
+
 const grouped = computed<Record<string, any[]>>(() => {
   const map: Record<string, any[]> = {}
-  for (const post of posts.value ?? []) {
-    const cat = post.path.split('/')[2] || '未分类'
+  for (const post of articles.value) {
+    const cat = categoryOf(post)
     ;(map[cat] ||= []).push(post)
   }
   return map
@@ -20,17 +24,17 @@ const categories = computed(() => Object.keys(grouped.value))
   <div>
     <h1 class="page-title">文章列表</h1>
     <p class="page-subtitle">
-      共收录 {{ posts?.length ?? 0 }} 篇文章，按技术分类整理归档。
+      共收录 {{ articles.length }} 篇文章，按技术分类整理归档。
     </p>
 
     <section v-for="cat in categories" :key="cat" class="category-block">
       <h2>
-        <NuxtLink :to="`/category/${cat.toLowerCase()}`">{{ cat }}</NuxtLink>
+        <NuxtLink :to="`/category/${cat}`">{{ cat }}</NuxtLink>
       </h2>
       <ul class="article-list">
-        <li v-for="post in grouped[cat]" :key="post.path">
-          <NuxtLink :to="post.path">
-            {{ post.path.split('/').pop() }}
+        <li v-for="post in grouped[cat]" :key="post.id">
+          <NuxtLink :to="articleHref(post)">
+            {{ articleTitle(post) }}
           </NuxtLink>
         </li>
       </ul>

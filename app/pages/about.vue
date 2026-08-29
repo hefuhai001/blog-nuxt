@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAsyncData } from 'nuxt/app'
 const { data: about } = await useAsyncData('about-page', () =>
   queryCollection('content').path('/about').first(),
 )
