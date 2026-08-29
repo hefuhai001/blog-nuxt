@@ -512,14 +512,27 @@ a {
 }
 
 .markdown-content pre {
-  background: #39303a;
-  color: #f4e7ee;
-  padding: 14px 16px;
-  border-radius: 16px;
+  color-scheme: light;
+  background: #f6f8fa !important;
+  color: #1f2328;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 16px;
   overflow-x: auto;
   font-size: 13.5px;
-  line-height: 1.6;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  line-height: 1.65;
+  box-shadow: none;
+}
+
+/* GitHub 风格的代码块右上角语言徽章 */
+.markdown-content pre code[class*="language-"]::before {
+  content: attr(class);
+  display: block;
+  float: right;
+  font-size: 11px;
+  color: #656d76;
+  letter-spacing: 0.3px;
+  margin: -4px -2px 8px 12px;
 }
 
 .markdown-content code {
@@ -528,10 +541,19 @@ a {
 }
 
 .markdown-content :not(pre) > code {
-  background: #ffeaf1;
-  color: #e04a82;
+  background: #eff1f3;
+  color: #cf222e;
   padding: 2px 6px;
   border-radius: 6px;
+}
+
+.markdown-content pre {
+  /* 让 shiki 的 token 始终使用 GitHub Light 配色，不跟随系统深色 */
+  color-scheme: light;
+  --shiki-github-dark: var(--shiki-github-light);
+  --shiki-github-dark-bg: var(--shiki-github-light-bg);
+  --shiki-dark: var(--shiki-default);
+  --shiki-dark-bg: var(--shiki-default-bg);
 }
 
 /* ============ 响应式 ============ */
