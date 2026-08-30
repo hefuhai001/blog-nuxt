@@ -554,8 +554,37 @@ html.dark body::after {
 .article-meta {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 14px;
+}
+
+.chip-icon {
+  width: 13px;
+  height: 13px;
+  opacity: 0.8;
+}
+
+/* 正文 + 目录双栏 */
+.article-grid.has-toc {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 216px;
+  gap: 28px;
+  align-items: start;
+}
+
+/* 标题锚点滚动补偿（吸顶导航） */
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4 {
+  scroll-margin-top: 84px;
+}
+
+@media (max-width: 860px) {
+  .article-grid.has-toc {
+    grid-template-columns: 1fr;
+  }
 }
 
 .article-nav {

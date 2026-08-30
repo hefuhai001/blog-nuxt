@@ -1,6 +1,6 @@
 type BlogItem = {
   id: string
-  path: string
+  path?: string
   title?: string
 }
 
@@ -39,4 +39,65 @@ export function articleTitle(item: MaybeBlogItem): string {
 /** 文章详情页 URL（用原始中文路径，唯一） */
 export function articleHref(item: MaybeBlogItem): string {
   return item ? `/blog/${partsOf(item.id).join('/')}` : '#'
+}
+
+/**
+ * 从 Nuxt Content v3 的 body（minimark 树）中提取纯文本。
+ * minimark 元素为 `[tag, props, ...children]`，文本节点即字符串。
+ */
+export function bodyTextOf(doc: any): string {
+  if (!doc) return ''
+  const parts: string[] = []
+  const walk = (node: any) => {
+    if (node == null) return
+    if (typeof node === 'string') {
+      parts.push(node)
+      return
+    }
+    if (Array.isArray(node)) {
+      for (const child of node) walk(child)
+      return
+    }
+    if (typeof node === 'object') {
+      if (node.type === 'text' && typeof node.value === 'string') parts.push(node.value)
+      if (Array.isArray(node.children)) for (const child of node.children) walk(child)
+      else if (Array.isArray(node.value)) for (const child of node.value) walk(child)
+    }
+  }
+  walk(doc.body ?? doc)
+  return parts.join(' ').replace(/\s+/g, ' ').trim()
+}
+
+/** 估算阅读时长（中文按 350 字/分钟，英文按 200 词/分钟） */
+export function readingTimeOf(doc: any): number {
+  const text = bodyTextOf(doc)
+  if (!text) return 0
+  const cjk = (text.match(/[\u4e00-\u9fff]/g) ?? []).length
+  const words = text.replace(/[\u4e00-\u9fff]/g, ' ').trim().split(/\s+/).filter(Boolean).length
+  const minutes = cjk / 350 + words / 200
+  return Math.max(1, Math.ceil(minutes))
+}
+
+/** 正文总字数（用于展示） */
+export function wordCountOf(doc: any): number {
+  const text = bodyTextOf(doc)
+  if (!text) return 0
+  return text.replace(/\s+/g, '').length
+}
+
+/** 目录：取 body.toc.links，并拍平成带 depth 的列表供滚动高亮 */
+export type TocItem = { id: string; text: string; depth: number }
+export function tocOf(doc: any): TocItem[] {
+  const links = doc?.body?.toc?.links
+  if (!Array.isArray(links)) return []
+  const out: TocItem[] = []
+  const walk = (items: any[], depth: number) => {
+    for (const item of items) {
+      if (!item?.id) continue
+      out.push({ id: item.id, text: item.text || item.title, depth: depth })
+      if (Array.isArray(item.children)) walk(item.children, depth + 1)
+    }
+  }
+  walk(links, 1)
+  return out
 }

@@ -46,6 +46,18 @@ const currentCategory = computed(() =>
       </ul>
     </div>
     <div class="card side-card">
+      <h3>标签</h3>
+      <div class="tag-cloud">
+        <NuxtLink
+          v-for="cat in categories"
+          :key="`tag-${cat.name}`"
+          :to="`/category/${cat.name}`"
+          class="tag-chip"
+          :class="{ active: currentCategory === cat.name }"
+        >{{ cat.name }}</NuxtLink>
+      </div>
+    </div>
+    <div class="card side-card">
       <h3>导航</h3>
       <ul class="list-group">
         <li class="list-row">
@@ -55,3 +67,41 @@ const currentCategory = computed(() =>
     </div>
   </aside>
 </template>
+
+<style scoped>
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--glass-bg-weak);
+  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease,
+    background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.tag-chip:hover {
+  color: var(--ios-blue-strong);
+  background: var(--ios-blue-soft);
+  border-color: transparent;
+  transform: translateY(-1px);
+}
+
+.tag-chip.active {
+  color: #fff;
+  background: var(--ios-blue-strong);
+  border-color: transparent;
+  box-shadow: var(--shadow-blue);
+}
+</style>
