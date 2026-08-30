@@ -20,12 +20,18 @@ const route = useRoute()
 const currentCategory = computed(() =>
   (route.params.category as string | undefined) ?? '',
 )
+
+const cardTitleClass =
+  'm-0 mb-3 font-(family-name:--font-display) text-base font-bold tracking-[-0.2px] text-(--text-primary)'
+const tagChipClass =
+  'inline-flex items-center rounded-full border border-(--glass-border) bg-(--glass-bg-weak) px-3 py-1 text-[12.5px] font-semibold text-(--text-secondary) backdrop-blur-(--glass-blur) backdrop-saturate-(--glass-saturate) transition-all duration-200 hover:-translate-y-px hover:border-transparent hover:bg-(--ios-blue-soft) hover:text-(--ios-blue-strong)'
+const tagChipActiveClass = 'border-transparent bg-(--ios-blue-strong) text-white shadow-(--shadow-blue)'
 </script>
 
 <template>
-  <aside class="blog-sidebar">
-    <div class="card side-card">
-      <h3>文章分类</h3>
+  <aside class="sticky top-6 grid gap-4 max-[840px]:static max-[840px]:grid-cols-2 max-[560px]:grid-cols-1">
+    <div class="card p-[18px]">
+      <h3 :class="cardTitleClass">文章分类</h3>
       <ul class="list-group">
         <li class="list-row">
           <NuxtLink to="/" class="list-link" :class="{ active: route.path === '/' }">
@@ -45,20 +51,19 @@ const currentCategory = computed(() =>
         </li>
       </ul>
     </div>
-    <div class="card side-card">
-      <h3>标签</h3>
-      <div class="tag-cloud">
+    <div class="card p-[18px]">
+      <h3 :class="cardTitleClass">标签</h3>
+      <div class="flex flex-wrap gap-[7px]">
         <NuxtLink
           v-for="cat in categories"
           :key="`tag-${cat.name}`"
           :to="`/category/${cat.name}`"
-          class="tag-chip"
-          :class="{ active: currentCategory === cat.name }"
+          :class="[tagChipClass, { [tagChipActiveClass]: currentCategory === cat.name }]"
         >{{ cat.name }}</NuxtLink>
       </div>
     </div>
-    <div class="card side-card">
-      <h3>导航</h3>
+    <div class="card p-[18px]">
+      <h3 :class="cardTitleClass">导航</h3>
       <ul class="list-group">
         <li class="list-row">
           <NuxtLink to="/about" class="list-link">关于本站</NuxtLink>
@@ -67,41 +72,3 @@ const currentCategory = computed(() =>
     </div>
   </aside>
 </template>
-
-<style scoped>
-.tag-cloud {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-}
-
-.tag-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  background: var(--glass-bg-weak);
-  border: 1px solid var(--glass-border);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease,
-    background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.tag-chip:hover {
-  color: var(--ios-blue-strong);
-  background: var(--ios-blue-soft);
-  border-color: transparent;
-  transform: translateY(-1px);
-}
-
-.tag-chip.active {
-  color: #fff;
-  background: var(--ios-blue-strong);
-  border-color: transparent;
-  box-shadow: var(--shadow-blue);
-}
-</style>

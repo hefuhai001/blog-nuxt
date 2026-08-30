@@ -62,19 +62,22 @@ useHead(() => ({
 
 <template>
   <article v-if="doc" class="card article-card">
-    <div class="article-meta">
+    <div class="mb-3.5 flex flex-wrap items-center gap-2">
       <NuxtLink :to="`/category/${categoryName}`" class="chip chip-blue">{{ category }}</NuxtLink>
       <span class="chip">
-        <svg class="chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <svg class="size-[13px] opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         {{ readingTime }} 分钟
       </span>
       <span class="chip">{{ wordCount.toLocaleString() }} 字</span>
     </div>
 
-    <h1 class="page-title" style="margin-bottom: 4px">{{ title }}</h1>
+    <h1 class="mb-1 font-(family-name:--font-display) text-[28px] font-extrabold tracking-[-0.5px] text-(--text-primary)">{{ title }}</h1>
     <ArticleStats :post-id="targetId" />
 
-    <div class="article-grid" :class="{ 'has-toc': toc.length }">
+    <div
+      class="grid items-start gap-7"
+      :class="toc.length ? 'grid-cols-[minmax(0,1fr)_216px] max-[860px]:grid-cols-1' : ''"
+    >
       <div class="markdown-content">
         <ProseEnhancer>
           <ContentRenderer :value="doc" />
@@ -86,14 +89,22 @@ useHead(() => ({
     <RelatedPosts v-if="related.length" :items="related" :category="category" />
     <Giscus :term="route.fullPath" />
 
-    <nav class="article-nav">
-      <NuxtLink v-if="prev" :to="articleHref(prev)">
-        <span class="label">上一篇</span>
+    <nav class="mt-9 flex justify-between gap-3">
+      <NuxtLink
+        v-if="prev"
+        :to="articleHref(prev)"
+        class="min-w-0 max-w-[48%] flex-1 rounded-2xl border border-(--glass-border) bg-(--glass-bg-weak) px-[18px] py-3.5 text-sm text-(--text-primary) backdrop-blur-(--glass-blur) backdrop-saturate-(--glass-saturate) transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-(--glass-bg)"
+      >
+        <span class="mb-0.5 block text-xs text-(--text-secondary)">上一篇</span>
         <span>{{ articleTitle(prev) }}</span>
       </NuxtLink>
       <span v-else />
-      <NuxtLink v-if="next" :to="articleHref(next)">
-        <span class="label">下一篇</span>
+      <NuxtLink
+        v-if="next"
+        :to="articleHref(next)"
+        class="min-w-0 max-w-[48%] flex-1 rounded-2xl border border-(--glass-border) bg-(--glass-bg-weak) px-[18px] py-3.5 text-right text-sm text-(--text-primary) backdrop-blur-(--glass-blur) backdrop-saturate-(--glass-saturate) transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-(--glass-bg)"
+      >
+        <span class="mb-0.5 block text-xs text-(--text-secondary)">下一篇</span>
         <span>{{ articleTitle(next) }}</span>
       </NuxtLink>
       <span v-else />

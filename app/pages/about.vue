@@ -8,7 +8,7 @@ useHead({ title: '关于' })
 
 <template>
   <div>
-    <h1 class="page-title">关于本站</h1>
+    <h1 class="mb-1.5 font-(family-name:--font-display) text-[28px] font-extrabold tracking-[-0.5px] text-(--text-primary)">关于本站</h1>
     <div class="card">
       <div class="markdown-content">
         <ContentRenderer v-if="about" :value="about" />

@@ -34,7 +34,7 @@
    ```
 
 3. 创建存储桶  
-   登录 MinIO Console（http://minio-ip:9001）→ Create Bucket → 名称与 AWS_STORAGE_BUCKET_NAME 一致。
+   登录 MinIO Console（`http://minio-ip:9001`）→ Create Bucket → 名称与 AWS_STORAGE_BUCKET_NAME 一致。
 
 4. 收集静态文件
 

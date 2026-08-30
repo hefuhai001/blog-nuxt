@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* NuxtLink 激活态变体（等价 .router-link-active） */
+@custom-variant router-link-active (&.router-link-active);
+
 /* =========================================================
    iOS 26 · Liquid Glass 设计系统
    ---------------------------------------------------------
@@ -159,42 +162,12 @@ html.dark body::after {
   opacity: 0.6;
 }
 
-/* ============ 布局容器 ============ */
-.blog-layout {
-  position: relative;
-  z-index: 1;
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 0 24px 40px;
-}
-
-.blog-body {
-  display: grid;
-  grid-template-columns: 1fr 272px;
-  gap: 28px;
-  align-items: start;
-}
-
-.blog-main {
-  min-width: 0;
-  position: relative;
-  z-index: 1;
-}
-
-.blog-footer {
-  margin-top: 56px;
-  padding: 24px 0 8px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-tertiary);
-}
-
 /* =========================================================
-   通用组件一：玻璃表面
+   通用组件（放 components 层，保证工具类可覆盖）
    ========================================================= */
+@layer components {
 .glass,
 .card,
-.nav-capsule,
 .list-group {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
@@ -426,223 +399,12 @@ html.dark body::after {
   line-height: 18px;
 }
 
-/* =========================================================
-   顶栏：悬浮玻璃胶囊导航
-   ========================================================= */
-.blog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 8px;
-  position: relative;
-  z-index: 2;
-}
-
-.site-name {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-  color: var(--text-primary);
-}
-
-.site-name .logo-emoji {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  font-size: 20px;
-  background: linear-gradient(135deg, #7aa2ff, #b18cff);
-  box-shadow: var(--shadow-blue);
-}
-
-.site-name b {
-  background: linear-gradient(120deg, #0a7cff, #7a5cff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.nav-capsule {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px;
-  border-radius: 999px;
-}
-
-.nav-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 36px;
-  padding: 0 16px;
-  border-radius: 999px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  transition: color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.nav-link:hover {
-  color: var(--text-primary);
-}
-
-.nav-link.router-link-active {
-  background: var(--ios-blue-strong);
-  color: #fff;
-  box-shadow: var(--shadow-blue);
-}
-
-/* ============ 页面标题 ============ */
-.page-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
-}
-
-.page-title {
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: var(--text-primary);
-  margin: 0 0 6px;
-}
-
-.page-subtitle {
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin: 0;
-}
-
-/* ============ 分类区块 ============ */
-.category-block {
-  margin-bottom: 26px;
-}
-
-.category-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-display);
-  font-size: 19px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 12px;
-  padding: 7px 16px;
-  border-radius: 999px;
-  background: var(--glass-bg-weak);
-  border: 1px solid var(--glass-border);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-}
-
-.category-title a:hover {
-  color: var(--ios-blue);
-}
-
-/* ============ 文章详情 ============ */
-.article-meta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
-.chip-icon {
-  width: 13px;
-  height: 13px;
-  opacity: 0.8;
-}
-
-/* 正文 + 目录双栏 */
-.article-grid.has-toc {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 216px;
-  gap: 28px;
-  align-items: start;
-}
-
-/* 标题锚点滚动补偿（吸顶导航） */
+/* ============ 文章详情（标题锚点滚动补偿：吸顶导航） ============ */
 .markdown-content h1,
 .markdown-content h2,
 .markdown-content h3,
 .markdown-content h4 {
   scroll-margin-top: 84px;
-}
-
-@media (max-width: 860px) {
-  .article-grid.has-toc {
-    grid-template-columns: 1fr;
-  }
-}
-
-.article-nav {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 36px;
-}
-
-.article-nav a {
-  flex: 1;
-  max-width: 48%;
-  padding: 14px 18px;
-  border-radius: 16px;
-  background: var(--glass-bg-weak);
-  border: 1px solid var(--glass-border);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  font-size: 14px;
-  color: var(--text-primary);
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.article-nav a:last-child {
-  text-align: right;
-}
-
-.article-nav a:hover {
-  background: var(--glass-bg);
-  transform: translateY(-2px);
-}
-
-.article-nav .label {
-  display: block;
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-bottom: 2px;
-}
-
-/* ============ 侧边栏 ============ */
-.blog-sidebar {
-  position: sticky;
-  top: 24px;
-  display: grid;
-  gap: 16px;
-}
-
-.side-card {
-  padding: 18px;
-}
-
-.side-card h3 {
-  margin: 0 0 12px;
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
-  color: var(--text-primary);
 }
 
 /* ============ Markdown 正文排版 ============ */
@@ -768,43 +530,7 @@ html.dark body::after {
 .markdown-content .shiki {
   background-color: transparent;
 }
-
-/* ============ 响应式 ============ */
-@media (max-width: 840px) {
-  .blog-body {
-    grid-template-columns: 1fr;
-  }
-
-  .blog-sidebar {
-    position: static;
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .blog-header nav {
-    gap: 2px;
-  }
-}
-
-@media (max-width: 560px) {
-  .blog-sidebar {
-    grid-template-columns: 1fr;
-  }
-
-  .site-name {
-    font-size: 19px;
-  }
-
-  .nav-link {
-    padding: 0 12px;
-    height: 34px;
-    font-size: 13px;
-  }
-
-  .icon-btn {
-    width: 34px;
-    height: 34px;
-  }
-}
+} /* end @layer components */
 
 /* ============ 无障碍：减弱动效 ============ */
 @media (prefers-reduced-motion: reduce) {
