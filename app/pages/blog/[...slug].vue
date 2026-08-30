@@ -63,7 +63,7 @@ useHead(() => ({
 <template>
   <article v-if="doc" class="card article-card">
     <div class="mb-3.5 flex flex-wrap items-center gap-2">
-      <NuxtLink :to="`/category/${categoryName}`" class="chip chip-blue">{{ category }}</NuxtLink>
+      <NuxtLink :to="`/category/${categoryName}`" class="chip chip-accent">{{ category }}</NuxtLink>
       <span class="chip">
         <svg class="size-[13px] opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         {{ readingTime }} 分钟
@@ -71,7 +71,7 @@ useHead(() => ({
       <span class="chip">{{ wordCount.toLocaleString() }} 字</span>
     </div>
 
-    <h1 class="mb-1 font-(family-name:--font-display) text-[28px] font-extrabold tracking-[-0.5px] text-(--text-primary)">{{ title }}</h1>
+    <h1 class="mb-1 font-(family-name:--font-display) text-[30px] font-extrabold tracking-[-0.5px] text-(--text-primary)">{{ title }}</h1>
     <ArticleStats :post-id="targetId" />
 
     <div

@@ -1,58 +1,78 @@
 <template>
   <div class="min-h-screen">
-    <!-- iOS 26 背景光斑层（供玻璃模糊） -->
-    <div class="ios-backdrop" aria-hidden="true" />
+    <!-- 透视网格 + 氛围光斑背景 -->
+    <div class="site-backdrop" aria-hidden="true">
+      <div class="grid-ceiling" />
+    </div>
 
-    <div class="relative z-[1] mx-auto max-w-[1080px] px-6 pb-10">
-      <!-- 吸顶悬浮玻璃岛 -->
-      <header
-        class="sticky top-3.5 z-50 mb-3 flex items-center justify-between gap-3 rounded-full border border-(--glass-border) bg-(--glass-bg-strong) py-2 pl-3.5 pr-2 shadow-[inset_0_1px_0_var(--glass-rim),0_8px_24px_rgba(0,0,0,0.08),0_2px_8px_rgba(0,0,0,0.05)] backdrop-blur-(--glass-blur) backdrop-saturate-(--glass-saturate) max-sm:top-2 max-sm:py-1.5 max-sm:pl-3"
-      >
+    <!-- 通栏导航 -->
+    <header
+      class="sticky top-0 z-50 border-b border-(--surface-border) bg-(--surface-strong) backdrop-blur-xl backdrop-saturate-150"
+    >
+      <div class="mx-auto flex h-16 max-w-[1200px] items-center gap-8 px-6 max-lg:gap-4 max-sm:px-4">
         <NuxtLink
           to="/"
-          class="inline-flex items-center gap-2.5 font-(family-name:--font-display) text-[19px] font-bold tracking-[-0.3px] text-(--text-primary) max-sm:gap-2 max-sm:text-[17px]"
+          class="flex shrink-0 items-center gap-2.5 font-(family-name:--font-display) text-[19px] font-extrabold tracking-[-0.3px] text-(--text-primary)"
         >
           <span
-            class="inline-flex size-[34px] items-center justify-center rounded-[10px] bg-gradient-to-br from-[#7aa2ff] to-[#b18cff] text-[17px] shadow-(--shadow-blue) max-sm:size-[30px] max-sm:text-[15px]"
-          >🌸</span>
-          <span>我的<b class="bg-gradient-to-r from-[#0a7cff] to-[#7a5cff] bg-clip-text text-transparent">技术博客</b></span>
+            class="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-(--accent) to-(--accent-strong) font-mono text-sm text-[#141414] shadow-(--shadow-accent)"
+          >&lt;/&gt;</span>
+          <span>CodeTrail <span class="text-(--accent)">·</span> <b class="font-extrabold">代码轨迹</b></span>
         </NuxtLink>
-        <nav class="inline-flex items-center gap-0.5 rounded-full bg-(--glass-bg-weak) p-1 shadow-[inset_0_1px_0_var(--glass-rim)]">
+
+        <nav class="flex items-center gap-1 max-md:hidden">
           <NuxtLink
             to="/"
-            class="inline-flex h-9 items-center justify-center rounded-full px-4 text-sm font-semibold text-(--text-secondary) transition-[color,background-color,box-shadow] duration-200 hover:text-(--text-primary) router-link-active:bg-(--ios-blue-strong) router-link-active:text-white router-link-active:shadow-(--shadow-blue) max-sm:h-[34px] max-sm:px-3 max-sm:text-[13px]"
-          >首页</NuxtLink>
+            class="inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold text-(--text-secondary) transition-colors duration-200 hover:bg-(--surface-weak) hover:text-(--text-primary) router-link-active:bg-(--accent-soft) router-link-active:text-(--accent)"
+          >
+            <span aria-hidden="true" class="text-xs">🏠</span> 首页
+          </NuxtLink>
           <NuxtLink
             to="/about"
-            class="inline-flex h-9 items-center justify-center rounded-full px-4 text-sm font-semibold text-(--text-secondary) transition-[color,background-color,box-shadow] duration-200 hover:text-(--text-primary) router-link-active:bg-(--ios-blue-strong) router-link-active:text-white router-link-active:shadow-(--shadow-blue) max-sm:h-[34px] max-sm:px-3 max-sm:text-[13px]"
-          >关于</NuxtLink>
+            class="inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold text-(--text-secondary) transition-colors duration-200 hover:bg-(--surface-weak) hover:text-(--text-primary) router-link-active:bg-(--accent-soft) router-link-active:text-(--accent)"
+          >
+            <span aria-hidden="true" class="text-xs">🧭</span> 关于
+          </NuxtLink>
+        </nav>
+
+        <div class="ml-auto flex items-center gap-2.5">
+          <!-- 搜索框（点击唤起命令面板） -->
           <button
             type="button"
-            class="icon-btn max-sm:size-[34px]"
-            aria-label="搜索"
-            title="搜索（⌘K / Ctrl K）"
+            class="hidden h-9 w-56 items-center gap-2 rounded-full border border-(--surface-border) bg-(--surface-weak) px-4 text-[13px] text-(--text-tertiary) transition-colors duration-200 hover:border-(--accent-soft) hover:text-(--text-secondary) md:flex"
+            aria-label="搜索文章"
             @click="useCommandPalette().open()"
           >
-            <svg class="size-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            搜索文章…
+            <kbd class="ml-auto rounded border border-(--surface-border) px-1.5 font-mono text-[11px]">⌘K</kbd>
+          </button>
+          <button
+            type="button"
+            class="icon-btn md:hidden"
+            aria-label="搜索"
+            @click="useCommandPalette().open()"
+          >
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
           </button>
           <ThemeToggle />
-        </nav>
-      </header>
-
-      <div class="grid grid-cols-[1fr_272px] items-start gap-7 max-[840px]:grid-cols-1">
-        <main class="relative z-[1] min-w-0">
-          <slot />
-        </main>
-        <BlogSidebar />
+        </div>
       </div>
+    </header>
 
-      <footer class="mt-14 pt-6 pb-2 text-center text-[13px] text-(--text-tertiary)">
-        © {{ new Date().getFullYear() }} · Made with 🍑 Nuxt &amp; Tailwind
-      </footer>
+    <div class="relative z-[1] mx-auto max-w-[1200px] px-6 pb-16 max-sm:px-4">
+      <slot />
     </div>
+
+    <footer class="relative z-[1] border-t border-(--surface-border) py-8 text-center text-[13px] text-(--text-tertiary)">
+      © {{ new Date().getFullYear() }} CodeTrail · 代码轨迹 · Made with ⚡ Nuxt &amp; Tailwind
+    </footer>
 
     <SearchModal />
   </div>

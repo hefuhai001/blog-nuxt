@@ -23,7 +23,7 @@ const list = computed(() =>
   <div>
     <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 class="mb-1.5 font-(family-name:--font-display) text-[28px] font-extrabold tracking-[-0.5px] text-(--text-primary)">分类：{{ rawCategory }}</h1>
+        <h1 class="mb-1.5 font-(family-name:--font-display) text-[28px] font-extrabold tracking-[-0.5px] text-(--text-primary)"><span class="font-mono text-(--accent)">#</span> {{ rawCategory }}</h1>
         <p class="m-0 text-sm text-(--text-secondary)">该分类下共 {{ list.length }} 篇文章。</p>
       </div>
       <NuxtLink to="/" class="btn btn-ghost">← 全部文章</NuxtLink>

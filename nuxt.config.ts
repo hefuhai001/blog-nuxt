@@ -9,8 +9,8 @@ export default defineNuxtConfig({
   ],
   colorMode: {
     classSuffix: '',
-    preference: 'system',
-    fallback: 'light',
+    preference: 'dark',
+    fallback: 'dark',
   },
   css: ['~/assets/css/main.css'],
   vite: {
