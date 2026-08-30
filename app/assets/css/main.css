@@ -388,6 +388,18 @@ html.dark {
   50% { opacity: 0; }
 }
 
+/* ============ 移动端下拉菜单动画 ============ */
+.menu-drop-enter-active,
+.menu-drop-leave-active {
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.menu-drop-enter-from,
+.menu-drop-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
 /* ============ 无障碍：减弱动效 ============ */
 @media (prefers-reduced-motion: reduce) {
   *,

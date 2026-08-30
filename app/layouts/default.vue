@@ -7,7 +7,7 @@
 
     <!-- 通栏导航 -->
     <header
-      class="sticky top-0 z-50 border-b border-(--surface-border) bg-(--surface-strong)"
+      class="sticky top-0 z-50 border-b border-(--surface-border) bg-(--surface-strong) max-md:relative"
     >
       <div class="mx-auto flex h-16 max-w-[1200px] items-center gap-8 px-6 max-lg:gap-4 max-sm:px-4">
         <NuxtLink
@@ -41,6 +41,27 @@
           </NuxtLink>
         </nav>
 
+        <!-- 移动端汉堡菜单 -->
+        <button
+          type="button"
+          class="icon-btn md:hidden"
+          :aria-expanded="mobileMenuOpen"
+          aria-label="打开菜单"
+          @click="mobileMenuOpen = !mobileMenuOpen"
+        >
+          <svg class="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <template v-if="!mobileMenuOpen">
+              <line x1="4" y1="7" x2="20" y2="7" />
+              <line x1="4" y1="12" x2="20" y2="12" />
+              <line x1="4" y1="17" x2="20" y2="17" />
+            </template>
+            <template v-else>
+              <line x1="6" y1="6" x2="18" y2="18" />
+              <line x1="18" y1="6" x2="6" y2="18" />
+            </template>
+          </svg>
+        </button>
+
         <div class="ml-auto flex items-center gap-2.5">
           <!-- 搜索框（点击唤起命令面板） -->
           <button
@@ -70,6 +91,26 @@
           <ThemeToggle />
         </div>
       </div>
+
+      <!-- 移动端下拉菜单 -->
+      <Transition name="menu-drop">
+        <nav
+          v-if="mobileMenuOpen"
+          class="absolute inset-x-0 top-full border-b border-(--surface-border) bg-(--surface-strong) p-3 shadow-(--shadow-card-lg) md:hidden"
+        >
+          <ul class="m-0 grid list-none gap-1 p-0">
+            <li v-for="item in mobileLinks" :key="item.to">
+              <NuxtLink
+                :to="item.to"
+                class="flex h-11 items-center gap-3 rounded-xl px-4 text-[15px] font-semibold text-(--text-secondary) transition-colors duration-150 hover:bg-(--surface-weak) hover:text-(--text-primary) router-link-active:bg-(--accent-soft) router-link-active:text-(--accent)"
+                @click="mobileMenuOpen = false"
+              >
+                <span aria-hidden="true" class="text-base">{{ item.icon }}</span>{{ item.label }}
+              </NuxtLink>
+            </li>
+          </ul>
+        </nav>
+      </Transition>
     </header>
 
     <div class="relative z-[1] mx-auto max-w-[1200px] px-6 pb-16 max-sm:px-4">
@@ -88,4 +129,16 @@
 import { useCommandPalette } from '~/composables/command-palette'
 
 useHead({ htmlAttrs: { lang: 'zh-CN' } })
+
+const route = useRoute()
+const mobileMenuOpen = ref(false)
+
+const mobileLinks = [
+  { to: '/', label: '首页', icon: '🏠' },
+  { to: '/blog', label: '博客文章', icon: '📝' },
+  { to: '/about', label: '关于本站', icon: '🧭' },
+]
+
+// 路由变化时自动收起菜单
+watch(() => route.fullPath, () => { mobileMenuOpen.value = false })
 </script>
