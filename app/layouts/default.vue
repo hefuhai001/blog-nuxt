@@ -28,10 +28,16 @@
             <span aria-hidden="true" class="text-xs">🏠</span> 首页
           </NuxtLink>
           <NuxtLink
+            to="/blog"
+            class="inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold text-(--text-secondary) transition-colors duration-200 hover:bg-(--surface-weak) hover:text-(--text-primary) router-link-active:bg-(--accent-soft) router-link-active:text-(--accent)"
+          >
+            <span aria-hidden="true" class="text-xs">📝</span> 博客文章
+          </NuxtLink>
+          <NuxtLink
             to="/about"
             class="inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold text-(--text-secondary) transition-colors duration-200 hover:bg-(--surface-weak) hover:text-(--text-primary) router-link-active:bg-(--accent-soft) router-link-active:text-(--accent)"
           >
-            <span aria-hidden="true" class="text-xs">🧭</span> 关于
+            <span aria-hidden="true" class="text-xs">🧭</span> 关于本站
           </NuxtLink>
         </nav>
 
