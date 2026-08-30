@@ -31,7 +31,8 @@ const categories = computed(() =>
 )
 
 const route = useRoute()
-const currentCategory = computed(() => (route.params.category as string | undefined) ?? '')
+/** 通过 ?category=xxx 在本页内筛选 */
+const currentCategory = computed(() => (route.query.category as string | undefined) ?? '')
 
 const hotPosts = computed(() =>
   [...articles.value]
@@ -68,7 +69,7 @@ const shownList = computed(() =>
         </li>
         <li v-for="cat in categories" :key="cat.name">
           <NuxtLink
-            :to="`/category/${cat.name}`"
+            :to="{ path: '/blog', query: currentCategory === cat.name ? {} : { category: cat.name } }"
             class="mb-1 flex items-center justify-between rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors duration-150"
             :class="currentCategory === cat.name
               ? 'bg-(--accent) text-[#141414] shadow-(--shadow-accent)'
@@ -87,7 +88,8 @@ const shownList = computed(() =>
     <section>
       <div class="mb-5 flex items-end justify-between">
         <h1 class="m-0 font-(family-name:--font-display) text-[24px] font-extrabold tracking-[-0.5px] text-(--text-primary)">
-          <span class="font-mono text-(--accent)">//</span> 博客文章
+          <span class="font-mono text-(--accent)">//</span>
+          {{ currentCategory ? `分类：${currentCategory}` : '博客文章' }}
           <span class="ml-2 text-sm font-medium text-(--text-tertiary)">{{ shownList.length }} 篇</span>
         </h1>
       </div>
@@ -106,7 +108,10 @@ const shownList = computed(() =>
 
           <div class="min-w-0">
             <div class="flex items-center gap-2">
-              <span class="chip chip-accent !py-0.5 !text-xs">{{ categoryOf(post) }}</span>
+              <NuxtLink
+                :to="{ path: '/blog', query: { category: categoryOf(post) } }"
+                class="chip chip-accent !py-0.5 !text-xs transition-transform duration-150 hover:scale-105"
+              >{{ categoryOf(post) }}</NuxtLink>
             </div>
             <h3 class="m-0 mt-2 truncate font-(family-name:--font-display) text-[17px] font-bold text-(--text-primary) transition-colors duration-200 group-hover:text-(--accent)">
               {{ articleTitle(post) }}
