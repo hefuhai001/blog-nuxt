@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { BookOpen } from '@lucide/vue'
+
 // 副标题打字机：循环打字/删除
 const phrases = [
   '程序员的终身学习路线图',
@@ -123,7 +125,7 @@ function tokenClass(line: string): string {
 
       <div class="mt-8 flex flex-wrap items-center gap-4">
         <a href="#articles" class="btn btn-primary">
-          <span aria-hidden="true">📖</span> 开始阅读
+          <BookOpen class="size-4" aria-hidden="true" /> 开始阅读
         </a>
         <NuxtLink to="/about" class="btn btn-ghost">关于本站</NuxtLink>
       </div>

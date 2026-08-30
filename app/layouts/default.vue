@@ -25,19 +25,19 @@
             to="/"
             class="inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold text-(--text-secondary) transition-colors duration-200 hover:bg-(--surface-weak) hover:text-(--text-primary) router-link-active:bg-(--accent-soft) router-link-active:text-(--accent)"
           >
-            <span aria-hidden="true" class="text-xs">🏠</span> 首页
+            <Home class="size-4" aria-hidden="true" /> 首页
           </NuxtLink>
           <NuxtLink
             to="/blog"
             class="inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold text-(--text-secondary) transition-colors duration-200 hover:bg-(--surface-weak) hover:text-(--text-primary) router-link-active:bg-(--accent-soft) router-link-active:text-(--accent)"
           >
-            <span aria-hidden="true" class="text-xs">📝</span> 博客文章
+            <BookOpen class="size-4" aria-hidden="true" /> 博客文章
           </NuxtLink>
           <NuxtLink
             to="/about"
             class="inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold text-(--text-secondary) transition-colors duration-200 hover:bg-(--surface-weak) hover:text-(--text-primary) router-link-active:bg-(--accent-soft) router-link-active:text-(--accent)"
           >
-            <span aria-hidden="true" class="text-xs">🧭</span> 关于本站
+            <Compass class="size-4" aria-hidden="true" /> 关于本站
           </NuxtLink>
         </nav>
 
@@ -49,17 +49,8 @@
           aria-label="打开菜单"
           @click="mobileMenuOpen = !mobileMenuOpen"
         >
-          <svg class="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-            <template v-if="!mobileMenuOpen">
-              <line x1="4" y1="7" x2="20" y2="7" />
-              <line x1="4" y1="12" x2="20" y2="12" />
-              <line x1="4" y1="17" x2="20" y2="17" />
-            </template>
-            <template v-else>
-              <line x1="6" y1="6" x2="18" y2="18" />
-              <line x1="18" y1="6" x2="6" y2="18" />
-            </template>
-          </svg>
+          <Menu v-if="!mobileMenuOpen" class="size-4.5" aria-hidden="true" />
+          <X v-else class="size-4.5" aria-hidden="true" />
         </button>
 
         <div class="ml-auto flex items-center gap-2.5">
@@ -70,10 +61,7 @@
             aria-label="搜索文章"
             @click="useCommandPalette().open()"
           >
-            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+            <Search class="size-4" aria-hidden="true" />
             搜索文章…
             <kbd class="ml-auto rounded border border-(--surface-border) px-1.5 font-mono text-[11px]">⌘K</kbd>
           </button>
@@ -83,10 +71,7 @@
             aria-label="搜索"
             @click="useCommandPalette().open()"
           >
-            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+            <Search class="size-4" aria-hidden="true" />
           </button>
           <ThemeToggle />
         </div>
@@ -105,7 +90,7 @@
                 class="flex h-11 items-center gap-3 rounded-xl px-4 text-[15px] font-semibold text-(--text-secondary) transition-colors duration-150 hover:bg-(--surface-weak) hover:text-(--text-primary) router-link-active:bg-(--accent-soft) router-link-active:text-(--accent)"
                 @click="mobileMenuOpen = false"
               >
-                <span aria-hidden="true" class="text-base">{{ item.icon }}</span>{{ item.label }}
+                <component :is="item.icon" class="size-4.5" aria-hidden="true" />{{ item.label }}
               </NuxtLink>
             </li>
           </ul>
@@ -118,7 +103,7 @@
     </div>
 
     <footer class="relative z-[1] border-t border-(--surface-border) py-8 text-center text-[13px] text-(--text-tertiary)">
-      © {{ new Date().getFullYear() }} CodeTrail · 代码轨迹 · Made with ⚡ Nuxt &amp; Tailwind
+      © {{ new Date().getFullYear() }} CodeTrail · 代码轨迹 · Made with <Zap class="inline size-3.5 align-[-2px] text-(--accent)" aria-hidden="true" /> Nuxt &amp; Tailwind
     </footer>
 
     <SearchModal />
@@ -126,6 +111,7 @@
 </template>
 
 <script setup lang="ts">
+import { BookOpen, Compass, Home, Menu, Search, X, Zap } from '@lucide/vue'
 import { useCommandPalette } from '~/composables/command-palette'
 
 useHead({ htmlAttrs: { lang: 'zh-CN' } })
@@ -134,9 +120,9 @@ const route = useRoute()
 const mobileMenuOpen = ref(false)
 
 const mobileLinks = [
-  { to: '/', label: '首页', icon: '🏠' },
-  { to: '/blog', label: '博客文章', icon: '📝' },
-  { to: '/about', label: '关于本站', icon: '🧭' },
+  { to: '/', label: '首页', icon: Home },
+  { to: '/blog', label: '博客文章', icon: BookOpen },
+  { to: '/about', label: '关于本站', icon: Compass },
 ]
 
 // 路由变化时自动收起菜单

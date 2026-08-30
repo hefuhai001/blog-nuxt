@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ArrowRight, Clock, CodeXml, Container, Folder, FolderOpen, Flame } from '@lucide/vue'
+import type { Component } from 'vue'
 import { isArticle, categoryOf, articleTitle, articleHref, bodyTextOf, readingTimeOf } from '~/composables/blog'
 
 const { data: posts } = await useAsyncData('blog-index', () =>
@@ -40,9 +42,13 @@ const hotPosts = computed(() =>
     .slice(0, 8),
 )
 
-const catIcon: Record<string, string> = {
-  django: '🐍',
-  docker: '🐳',
+const catIcon: Record<string, Component> = {
+  django: CodeXml,
+  docker: Container,
+}
+
+function catIconOf(name: string): Component {
+  return catIcon[name] ?? Folder
 }
 
 const shownList = computed(() =>
@@ -55,7 +61,7 @@ const shownList = computed(() =>
     <!-- 左：分类导航 -->
     <aside v-reveal class="card sticky top-24 !p-3 max-xl:hidden">
       <h3 class="m-0 flex items-center gap-2 px-3 pb-3 pt-1 font-(family-name:--font-display) text-[15px] font-bold text-(--text-primary)">
-        <span aria-hidden="true">🗂️</span> 文章分类
+        <FolderOpen class="size-4" aria-hidden="true" /> 文章分类
       </h3>
       <ul class="m-0 grid list-none p-0">
         <li>
@@ -76,7 +82,7 @@ const shownList = computed(() =>
               : 'text-(--text-secondary) hover:bg-(--surface-weak) hover:text-(--text-primary)'"
           >
             <span class="flex items-center gap-2">
-              <span aria-hidden="true">{{ catIcon[cat.name] ?? '📁' }}</span>{{ cat.name }}
+              <component :is="catIconOf(cat.name)" class="size-4" aria-hidden="true" />{{ cat.name }}
             </span>
             <span class="text-xs opacity-70">{{ cat.count }}</span>
           </NuxtLink>
@@ -103,7 +109,7 @@ const shownList = computed(() =>
           <div
             class="grid h-[92px] place-items-center overflow-hidden rounded-xl bg-gradient-to-br from-(--accent-soft) to-(--surface-weak) font-(family-name:--font-display) text-3xl font-extrabold text-(--accent) transition-transform duration-300 group-hover:scale-[1.03] max-sm:h-16"
           >
-            {{ catIcon[categoryOf(post)] ?? '📝' }}
+            <component :is="catIconOf(categoryOf(post))" class="size-9" stroke-width="1.6" aria-hidden="true" />
           </div>
 
           <div class="min-w-0">
@@ -121,11 +127,11 @@ const shownList = computed(() =>
             </p>
             <div class="mt-2.5 flex items-center gap-4 text-xs text-(--text-tertiary)">
               <span class="flex items-center gap-1">
-                <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <Clock class="size-3.5" aria-hidden="true" />
                 {{ metaOf(post) }}
               </span>
               <span class="ml-auto flex items-center gap-1 text-(--accent) opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                阅读全文 <span aria-hidden="true">→</span>
+                阅读全文 <ArrowRight class="size-3.5" aria-hidden="true" />
               </span>
             </div>
           </div>
@@ -136,7 +142,7 @@ const shownList = computed(() =>
     <!-- 右：热门文章 -->
     <aside v-reveal="{ delay: 120 }" class="card sticky top-24 !p-5 max-2xl:hidden">
       <h3 class="m-0 flex items-center gap-2 border-b border-(--divider) pb-3 font-(family-name:--font-display) text-[15px] font-bold text-(--text-primary)">
-        <span aria-hidden="true">🔥</span> 热门文章
+        <Flame class="size-4 text-(--accent)" aria-hidden="true" /> 热门文章
       </h3>
       <ol class="m-0 grid list-none gap-4 p-0 pt-4">
         <li v-for="(post, i) in hotPosts" :key="post.id">

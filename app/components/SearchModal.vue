@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ChevronRight, Search } from '@lucide/vue'
 import { articleHref } from '~/composables/blog'
 import { useCommandPalette } from '~/composables/command-palette'
 
@@ -115,10 +116,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
       <div v-if="isOpen" class="palette-backdrop" @click.self="close">
         <div class="palette" role="dialog" aria-modal="true" aria-label="搜索文章">
           <div class="palette-search">
-            <svg class="palette-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+            <Search class="palette-search-icon" aria-hidden="true" />
             <input
               ref="inputEl"
               v-model="q"
@@ -149,7 +147,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
                     <span class="palette-title" v-html="highlight(item.title, q)" />
                     <span class="palette-excerpt" v-html="highlight(excerpt(item), q)" />
                   </span>
-                  <svg class="palette-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6" /></svg>
+                  <ChevronRight class="palette-go" aria-hidden="true" />
                 </button>
               </li>
             </ul>

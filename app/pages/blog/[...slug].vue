@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Clock } from '@lucide/vue'
 import {
   isArticle,
   categoryOf,
@@ -65,7 +66,7 @@ useHead(() => ({
     <div class="mb-3.5 flex flex-wrap items-center gap-2">
       <NuxtLink :to="{ path: '/blog', query: { category: categoryName } }" class="chip chip-accent">{{ category }}</NuxtLink>
       <span class="chip">
-        <svg class="size-[13px] opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <Clock class="size-[13px] opacity-80" aria-hidden="true" />
         {{ readingTime }} 分钟
       </span>
       <span class="chip">{{ wordCount.toLocaleString() }} 字</span>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Keyboard } from '@lucide/vue'
 import { isArticle, categoryOf, bodyTextOf, readingTimeOf } from '~/composables/blog'
 
 const { data: posts } = await useAsyncData('about-posts', () =>
@@ -34,7 +35,7 @@ const stack = ['Nuxt 4', 'Vue 3', 'TypeScript', 'Tailwind CSS v4', 'Nuxt Content
       <div class="h-28 bg-gradient-to-r from-(--accent-soft) via-(--surface-weak) to-(--accent-soft)" />
       <div class="px-7 pb-7">
         <div class="-mt-10 mb-4 grid size-20 place-items-center rounded-3xl border border-line bg-surface-strong text-4xl shadow-(--shadow-card)">
-          <span aria-hidden="true">⌨️</span>
+          <Keyboard class="size-8 text-(--accent)" stroke-width="1.6" aria-hidden="true" />
         </div>
         <h1 class="m-0 font-(family-name:--font-display) text-[26px] font-extrabold tracking-[-0.5px] text-(--text-primary)">
           CodeTrail · 代码轨迹

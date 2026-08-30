@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Moon, Sun } from '@lucide/vue'
+
 const colorMode = useColorMode()
 
 const isDark = computed(() => colorMode.value === 'dark')
@@ -15,6 +17,7 @@ function toggle() {
     :title="isDark ? '切换到白天模式' : '切换到黑夜模式'"
     @click="toggle"
   >
-    <span class="theme-icon">{{ isDark ? '🌙' : '☀️' }}</span>
+    <Sun v-if="isDark" class="size-4" aria-hidden="true" />
+    <Moon v-else class="size-4" aria-hidden="true" />
   </button>
 </template>
