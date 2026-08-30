@@ -93,7 +93,7 @@ useHead(() => ({
       <NuxtLink
         v-if="prev"
         :to="articleHref(prev)"
-        class="min-w-0 max-w-[48%] flex-1 rounded-2xl border border-(--glass-border) bg-(--glass-bg-weak) px-[18px] py-3.5 text-sm text-(--text-primary) backdrop-blur-(--glass-blur) backdrop-saturate-(--glass-saturate) transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-(--glass-bg)"
+        class="min-w-0 max-w-[48%] flex-1 rounded-2xl border border-(--surface-border) bg-(--surface-weak) px-[18px] py-3.5 text-sm text-(--text-primary) transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-(--surface)"
       >
         <span class="mb-0.5 block text-xs text-(--text-secondary)">上一篇</span>
         <span>{{ articleTitle(prev) }}</span>
@@ -102,7 +102,7 @@ useHead(() => ({
       <NuxtLink
         v-if="next"
         :to="articleHref(next)"
-        class="min-w-0 max-w-[48%] flex-1 rounded-2xl border border-(--glass-border) bg-(--glass-bg-weak) px-[18px] py-3.5 text-right text-sm text-(--text-primary) backdrop-blur-(--glass-blur) backdrop-saturate-(--glass-saturate) transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-(--glass-bg)"
+        class="min-w-0 max-w-[48%] flex-1 rounded-2xl border border-(--surface-border) bg-(--surface-weak) px-[18px] py-3.5 text-right text-sm text-(--text-primary) transition-[background-color,transform] duration-200 hover:-translate-y-0.5 hover:bg-(--surface)"
       >
         <span class="mb-0.5 block text-xs text-(--text-secondary)">下一篇</span>
         <span>{{ articleTitle(next) }}</span>

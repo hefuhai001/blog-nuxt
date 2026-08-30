@@ -7,7 +7,7 @@
 
     <!-- 通栏导航 -->
     <header
-      class="sticky top-0 z-50 border-b border-(--surface-border) bg-(--surface-strong) backdrop-blur-xl backdrop-saturate-150"
+      class="sticky top-0 z-50 border-b border-(--surface-border) bg-(--surface-strong)"
     >
       <div class="mx-auto flex h-16 max-w-[1200px] items-center gap-8 px-6 max-lg:gap-4 max-sm:px-4">
         <NuxtLink
