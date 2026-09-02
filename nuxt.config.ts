@@ -31,7 +31,10 @@ export default defineNuxtConfig({
     },
   },
   pwa: {
-    registerType: 'autoUpdate',
+    // 'prompt' 模式：新版本 SW 安装完成后进入等待状态，
+    // 旧 SW + 旧缓存保持一致，用户确认刷新后才切换，
+    // 避免旧 HTML 引用已失效的 hash 资源导致出现无样式页面
+    registerType: 'prompt',
     manifest: {
       name: 'CodeTrail · 代码轨迹',
       short_name: 'CodeTrail',
@@ -48,6 +51,15 @@ export default defineNuxtConfig({
     },
     workbox: {
       navigateFallback: '/',
+      // 这些请求不走 SPA 回退，避免接口/静态资源被回退成 index.html
+      navigateFallbackDenylist: [
+        /^\/api\//,
+        /^\/_nuxt\//,
+        /^\/_payload/,
+        /^\/@/,
+        /^\/__nuxt_error/,
+        /\.(xml|txt|json|webmanifest|svg|ico|png|jpg|jpeg|webp|woff2?)$/,
+      ],
       globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
     },
     client: {
