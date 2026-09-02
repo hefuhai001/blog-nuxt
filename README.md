@@ -2,6 +2,15 @@
 
 一个基于 **Nuxt 4 + Nuxt Content** 构建的暗黑科技风个人技术博客，记录后端开发与工程实践中的真实经验——Django、Docker、数据库与日常踩坑，把每一次调试的弯路变成可复用的轨迹。
 
+## 界面预览
+
+<p align="center">
+  <img src="public/screenshot-desktop.png" alt="桌面端界面" width="70%" />
+</p>
+<p align="center">
+  <img src="public/screenshot-mobile.png" alt="移动端界面" width="25%" />
+</p>
+
 ## ✨ 特性
 
 - **🎨 暗黑金色设计系统**：CodeTrail 自定义主题，实色表面 + 金色强调 + 透视网格背景，支持亮/暗主题切换（默认暗黑）
@@ -102,6 +111,14 @@ runtimeConfig: {
 pnpm build   # 产出 .output 目录
 ```
 
----
+## ☕ 捐赠支持
 
-© CodeTrail · 代码轨迹 · Made with ⚡ Nuxt & Tailwind
+如果这个项目对你有帮助，请我喝杯奶茶吧～你的支持是我持续维护的动力！
+
+<p align="center">
+  <img src="public/donation-qr.jpg" alt="捐赠二维码" width="240" />
+</p>
+
+## License
+
+内部项目，仅供学习交流使用。
