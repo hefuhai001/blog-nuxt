@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Eye, Heart } from '@lucide/vue'
 import { usePostStats } from '~/composables/stats'
 
 const props = defineProps<{ postId: string }>()
