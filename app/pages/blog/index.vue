@@ -103,9 +103,9 @@ const shownList = computed(() =>
         v-for="(post, i) in shownList"
         :key="post.id"
         v-reveal="{ delay: Math.min(i, 6) * 50 }"
-        class="card group mb-5 !p-5"
+        class="card group relative mb-5 !p-5"
       >
-        <NuxtLink :to="articleHref(post)" class="grid grid-cols-[132px_1fr] gap-5 max-sm:grid-cols-1 max-sm:gap-3">
+        <div class="grid grid-cols-[132px_1fr] gap-5 max-sm:grid-cols-1 max-sm:gap-3">
           <div
             class="grid h-[92px] place-items-center overflow-hidden rounded-xl bg-gradient-to-br from-(--accent-soft) to-(--surface-weak) font-(family-name:--font-display) text-3xl font-extrabold text-(--accent) transition-transform duration-300 group-hover:scale-[1.03] max-sm:h-16"
           >
@@ -116,11 +116,11 @@ const shownList = computed(() =>
             <div class="flex items-center gap-2">
               <NuxtLink
                 :to="{ path: '/blog', query: { category: categoryOf(post) } }"
-                class="chip chip-accent !py-0.5 !text-xs transition-transform duration-150 hover:scale-105"
+                class="chip chip-accent relative z-10 !py-0.5 !text-xs transition-transform duration-150 hover:scale-105"
               >{{ categoryOf(post) }}</NuxtLink>
             </div>
             <h3 class="m-0 mt-2 truncate font-(family-name:--font-display) text-[17px] font-bold text-(--text-primary) transition-colors duration-200 group-hover:text-(--accent)">
-              {{ articleTitle(post) }}
+              <NuxtLink :to="articleHref(post)" class="post-title-link">{{ articleTitle(post) }}</NuxtLink>
             </h3>
             <p class="m-0 mt-1.5 line-clamp-2 text-[13.5px] leading-relaxed text-(--text-secondary)">
               {{ excerptOf(post) }}
@@ -135,7 +135,7 @@ const shownList = computed(() =>
               </span>
             </div>
           </div>
-        </NuxtLink>
+        </div>
       </div>
     </section>
 
@@ -160,3 +160,14 @@ const shownList = computed(() =>
     </aside>
   </div>
 </template>
+
+<style scoped>
+/* 拉伸链接：标题链接的 ::after 覆盖整张卡片，实现"整卡可点"，
+   同时避免在卡片内嵌套 <a>（分类 chip 独立为链接，用 z-10 置于上层） */
+.post-title-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+</style>
