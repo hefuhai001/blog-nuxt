@@ -34,6 +34,12 @@
             <BookOpen class="size-4" aria-hidden="true" /> 博客文章
           </NuxtLink>
           <NuxtLink
+            to="/links"
+            class="inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold text-(--text-secondary) transition-colors duration-200 hover:bg-(--surface-weak) hover:text-(--text-primary) router-link-active:bg-(--accent-soft) router-link-active:text-(--accent)"
+          >
+            <Globe class="size-4" aria-hidden="true" /> 网址导航
+          </NuxtLink>
+          <NuxtLink
             to="/about"
             class="inline-flex h-9 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold text-(--text-secondary) transition-colors duration-200 hover:bg-(--surface-weak) hover:text-(--text-primary) router-link-active:bg-(--accent-soft) router-link-active:text-(--accent)"
           >
@@ -111,7 +117,7 @@
 </template>
 
 <script setup lang="ts">
-import { BookOpen, Compass, Home, Menu, Search, X, Zap } from '@lucide/vue'
+import { BookOpen, Compass, Globe, Home, Menu, Search, X, Zap } from '@lucide/vue'
 import { useCommandPalette } from '~/composables/command-palette'
 
 useHead({ htmlAttrs: { lang: 'zh-CN' } })
@@ -122,6 +128,7 @@ const mobileMenuOpen = ref(false)
 const mobileLinks = [
   { to: '/', label: '首页', icon: Home },
   { to: '/blog', label: '博客文章', icon: BookOpen },
+  { to: '/links', label: '网址导航', icon: Globe },
   { to: '/about', label: '关于本站', icon: Compass },
 ]
 

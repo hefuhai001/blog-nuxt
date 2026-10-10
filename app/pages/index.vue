@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ArrowRight, Clock, CodeXml, Container, Folder } from '@lucide/vue'
+import { ArrowRight, Clock, CodeXml, Container, Folder, Globe } from '@lucide/vue'
+import { NuxtLink } from '#components'
 import type { Component } from 'vue'
 import { isArticle, categoryOf, articleTitle, articleHref, bodyTextOf, readingTimeOf } from '~/composables/blog'
+import { mySites } from '~/data/sites'
 
 const { data: posts } = await useAsyncData('blog-index', () =>
   queryCollection('blog').order('path', 'ASC').all(),
@@ -29,6 +31,11 @@ const catIcon: Record<string, Component> = {
 
 function catIconOf(name: string): Component {
   return catIcon[name] ?? Folder
+}
+
+/** 以 / 开头视为站内链接，使用 NuxtLink 打开 */
+function isInternal(url: string): boolean {
+  return url.startsWith('/')
 }
 </script>
 
@@ -83,6 +90,52 @@ function catIconOf(name: string): Component {
 
       <div v-reveal class="mt-8 text-center sm:hidden">
         <NuxtLink to="/blog" class="btn btn-primary">更多文章 <ArrowRight class="size-4" aria-hidden="true" /></NuxtLink>
+      </div>
+    </section>
+
+    <!-- 网址导航快捷入口 -->
+    <section class="mt-14">
+      <div v-reveal class="mb-8 flex items-end justify-between gap-4">
+        <div>
+          <h2 class="m-0 font-(family-name:--font-display) text-[26px] font-extrabold tracking-[-0.5px] text-(--text-primary)">
+            <span class="font-mono text-(--accent)">//</span> 网址导航
+          </h2>
+          <p class="mt-1 text-sm text-(--text-secondary)">
+            我制作的站点与整理的推荐网站，一键直达。
+          </p>
+        </div>
+        <NuxtLink to="/links" class="btn btn-primary max-sm:hidden">
+          全部导航 <ArrowRight class="size-4" aria-hidden="true" />
+        </NuxtLink>
+      </div>
+
+      <div class="grid grid-cols-3 gap-5 max-lg:grid-cols-1">
+        <component
+          :is="isInternal(site.url) ? NuxtLink : 'a'"
+          v-for="(site, i) in mySites"
+          v-bind="isInternal(site.url) ? { to: site.url } : { href: site.url, target: '_blank', rel: 'noopener' }"
+          :key="site.name"
+          v-reveal="{ delay: Math.min(i, 6) * 50 }"
+          class="card group flex items-start gap-4 !p-5"
+        >
+          <div
+            class="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-(--accent-soft) to-(--surface-weak) text-(--accent) transition-transform duration-300 group-hover:scale-[1.05]"
+          >
+            <component :is="site.icon" class="size-6" stroke-width="1.6" aria-hidden="true" />
+          </div>
+          <div class="min-w-0">
+            <h3 class="m-0 truncate font-(family-name:--font-display) text-[16px] font-bold text-(--text-primary) transition-colors duration-200 group-hover:text-(--accent)">
+              {{ site.name }}
+            </h3>
+            <p class="m-0 mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-(--text-secondary)">
+              {{ site.desc }}
+            </p>
+          </div>
+        </component>
+      </div>
+
+      <div v-reveal class="mt-8 text-center sm:hidden">
+        <NuxtLink to="/links" class="btn btn-primary">全部导航 <ArrowRight class="size-4" aria-hidden="true" /></NuxtLink>
       </div>
     </section>
   </div>
