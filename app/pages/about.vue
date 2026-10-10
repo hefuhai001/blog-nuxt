@@ -29,7 +29,7 @@ const stack = ['Nuxt 4', 'Vue 3', 'TypeScript', 'Tailwind CSS v4', 'Nuxt Content
 </script>
 
 <template>
-  <div class="mx-auto max-w-[880px]">
+  <div>
     <!-- 站点名片 -->
     <section v-reveal class="card relative overflow-hidden !p-0">
       <div class="h-28 bg-gradient-to-r from-(--accent-soft) via-(--surface-weak) to-(--accent-soft)" />

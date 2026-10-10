@@ -11,7 +11,7 @@ function isInternal(url: string): boolean {
 </script>
 
 <template>
-  <div class="mx-auto max-w-[1080px]">
+  <div>
     <!-- 头部名片 -->
     <section v-reveal class="card relative overflow-hidden !p-0">
       <div class="h-24 bg-gradient-to-r from-(--accent-soft) via-(--surface-weak) to-(--accent-soft)" />
