@@ -1,0 +1,32 @@
+name: blog-nuxt
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: blog-nuxt:latest
+    container_name: blog-nuxt
+    restart: unless-stopped
+    # 持久化应用数据（主密码哈希 + 已保存的 MySQL 连接），容器重建不丢失
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+    expose:
+      - "${APP_PORT:-3000}"
+    volumes:
+      # 站点导航数据（data/sites.json）：挂载出来，改完重启容器即生效，无需重建镜像
+      - ./data:/app/data
+    networks:
+      - webnet
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+networks:
+  webnet:
+    external: true

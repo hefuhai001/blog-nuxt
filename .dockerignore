@@ -1,0 +1,19 @@
+# Nuxt build outputs
+.output
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
+node_modules
+
+# 运行时数据（构建镜像时不需要，由 volume 持久化）
+.data
+
+# 本地环境与仓库无关文件
+.git
+docs
+*.log
+.env
+.env.*
