@@ -13,8 +13,8 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - HOST=0.0.0.0
-    expose:
-      - "${APP_PORT:-3000}"
+    ports:
+      - "3000:3000"
     volumes:
       # 站点导航数据（data/sites.json）：挂载出来，改完重启容器即生效，无需重建镜像
       - ./data:/app/data
