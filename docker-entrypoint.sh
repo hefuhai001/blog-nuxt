@@ -7,7 +7,8 @@ DATA_DIR="${DATA_DIR:-/app/data}"
 
 # 仅在以 root 启动时才需要修正属主并降权（镜像不设置 USER node，须 root 启动才能 chown）
 if [ "$(id -u)" = "0" ]; then
-  mkdir -p "$DATA_DIR"
+  # content/ 存放 Nuxt Content 的 SQLite；目录需先存在，否则 SQLITE_CANTOPEN
+  mkdir -p "$DATA_DIR/content"
   chown -R node:node "$DATA_DIR" 2>/dev/null || true
 
   # 降权到 node 用户执行实际命令（gosu = Debian 下 su-exec 的等价物）

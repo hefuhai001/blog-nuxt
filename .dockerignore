@@ -8,6 +8,9 @@ dist
 # Node dependencies
 node_modules
 
+# 运行时生成的 Nuxt Content 数据库（构建镜像时由 builder 重新生成，避免带入本地脏数据）
+data/content
+
 # 本地环境与仓库无关文件
 .git
 docs

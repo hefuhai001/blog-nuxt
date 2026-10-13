@@ -34,6 +34,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOST=0.0.0.0
+# Nuxt Content 运行时 SQLite 需落在可写目录：指向 data/（挂载出来可持久化），
+# 否则默认相对路径会被解析到只读的 .output 目录，导致 SQLITE_CANTOPEN
+ENV NUXT_CONTENT_DATABASE_FILENAME=/app/data/content/contents.sqlite
 
 # 拷贝 Nuxt/Nitro 构建产物
 COPY --from=builder /app/.output ./.output

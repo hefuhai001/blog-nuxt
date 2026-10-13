@@ -7,6 +7,17 @@ export default defineNuxtConfig({
     '@nuxtjs/color-mode',
     '@vite-pwa/nuxt',
   ],
+  content: {
+    // 开发/构建期的本地数据库统一落到 data/（不再使用 .data）
+    _localDatabase: {
+      type: 'sqlite',
+      filename: 'data/content/contents.sqlite',
+    },
+    // 运行时数据库路径由容器环境变量 NUXT_CONTENT_DATABASE_FILENAME 指定为
+    // /app/data/content/contents.sqlite（见 Dockerfile）。默认的相对路径会被解析到
+    // 只读的 .output 目录，导致 SQLITE_CANTOPEN。
+    // 如需在非容器环境运行构建产物，请设置同名环境变量为可写的绝对路径。
+  },
   colorMode: {
     classSuffix: '',
     preference: 'dark',
