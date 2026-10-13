@@ -1,16 +1,17 @@
 <!--
-  PwaPrompt.vue - PWA 版本/离线提示条
-  用途：新版本 Service Worker 就绪时提示用户刷新，离线可访问时给出提示
+  PwaPrompt.vue - PWA 版本 / 离线提示条
+  用途：新版本 Service Worker 就绪时提示刷新；离线可访问时给出提示
   使用位置：app.vue
   输入参数：无（读取 @vite-pwa/nuxt 注入的 $pwa 状态）
-  输出：右下角浮层提示
+  输出：右下角提示条
+  说明：安装按钮由 PwaInstallButton.vue 负责，本组件只处理版本/离线提示
 -->
 <script setup lang="ts">
 import { RefreshCw, X } from '@lucide/vue'
 
 const pwa = usePWA()
 
-const visible = computed(() => Boolean(pwa?.needRefresh || pwa?.offlineReady))
+const showUpdate = computed(() => Boolean(pwa?.needRefresh || pwa?.offlineReady))
 
 function reload() {
   pwa?.updateServiceWorker(true)
@@ -19,17 +20,31 @@ function reload() {
 
 <template>
   <Transition name="pwa-toast">
-    <div v-if="pwa && visible" class="pwa-toast" role="status" aria-live="polite">
-      <RefreshCw class="pwa-toast__icon" :class="{ spin: pwa.needRefresh }" aria-hidden="true" />
-      <p class="pwa-toast__text">
+    <div
+      v-if="pwa && showUpdate"
+      class="fixed right-5 bottom-[84px] z-100 flex max-w-[min(92vw,420px)] items-center gap-2.5 rounded-[14px] border border-line bg-surface-strong px-3.5 py-3 text-sm text-content shadow-[var(--shadow-card-lg)]"
+      role="status"
+      aria-live="polite"
+    >
+      <RefreshCw
+        class="size-[18px] shrink-0 text-accent"
+        :class="{ 'animate-[pwa-spin_1.4s_linear_infinite]': pwa.needRefresh }"
+        aria-hidden="true"
+      />
+      <p class="m-0 leading-snug">
         {{ pwa.needRefresh ? '发现新版本，刷新以获取最新内容' : '本站已可离线访问' }}
       </p>
-      <button v-if="pwa.needRefresh" type="button" class="pwa-toast__action" @click="reload">
+      <button
+        v-if="pwa.needRefresh"
+        type="button"
+        class="shrink-0 cursor-pointer rounded-full bg-accent px-3 py-1.5 text-[13px] font-semibold text-[#141414] transition-[background-color,transform] duration-200 hover:bg-accent-strong active:scale-95"
+        @click="reload"
+      >
         立即刷新
       </button>
       <button
         type="button"
-        class="pwa-toast__close"
+        class="grid size-[26px] shrink-0 cursor-pointer place-items-center rounded-lg bg-transparent text-content-2 transition-colors duration-200 hover:bg-surface-weak hover:text-content"
         aria-label="关闭提示"
         @click="pwa.cancelPrompt()"
       >
@@ -39,82 +54,8 @@ function reload() {
   </Transition>
 </template>
 
-<style scoped>
-.pwa-toast {
-  position: fixed;
-  right: 20px;
-  /* 抬高，给右下角的 PWA 安装悬浮按钮留出位置 */
-  bottom: 84px;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  max-width: min(92vw, 420px);
-  padding: 12px 14px;
-  border: 1px solid var(--surface-border);
-  border-radius: 14px;
-  background: var(--surface-strong);
-  box-shadow: var(--shadow-card-lg);
-  color: var(--text-primary);
-  font-size: 14px;
-}
-
-.pwa-toast__icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  color: var(--accent);
-}
-
-.pwa-toast__icon.spin {
-  animation: pwa-spin 1.4s linear infinite;
-}
-
-.pwa-toast__text {
-  margin: 0;
-  line-height: 1.4;
-}
-
-.pwa-toast__action {
-  flex-shrink: 0;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 999px;
-  background: var(--accent);
-  color: #141414;
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.15s ease;
-}
-
-.pwa-toast__action:hover {
-  background: var(--accent-strong);
-}
-
-.pwa-toast__action:active {
-  transform: scale(0.95);
-}
-
-.pwa-toast__close {
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.pwa-toast__close:hover {
-  background: var(--surface-weak);
-  color: var(--text-primary);
-}
-
+<!-- 仅保留 Tailwind 无法表达的部分：关键帧动画与 Vue <Transition> 过渡类 -->
+<style>
 @keyframes pwa-spin {
   to {
     transform: rotate(360deg);

@@ -69,37 +69,60 @@ function dismiss() {
   <Transition name="pwa-fab">
     <div
       v-if="visible"
-      class="pwa-root"
+      class="fixed right-5 bottom-5 flex flex-col items-end gap-3"
       :style="{ zIndex: showIosSheet ? 110 : 90 }"
     >
       <!-- iOS「添加到主屏幕」引导卡片 -->
       <Transition name="pwa-sheet">
-        <div v-if="showIosSheet" class="pwa-sheet" role="dialog" aria-label="添加到主屏幕指引">
-          <p class="pwa-sheet__title">安装到主屏幕</p>
-          <ol class="pwa-sheet__steps">
+        <div
+          v-if="showIosSheet"
+          class="relative w-[min(88vw,300px)] rounded-2xl border border-line bg-surface-strong px-4 pt-3.5 pb-3 text-content shadow-[var(--shadow-card-lg)]"
+          role="dialog"
+          aria-label="添加到主屏幕指引"
+        >
+          <p class="mt-0 mb-2 font-display text-[14.5px] font-bold">安装到主屏幕</p>
+          <ol class="m-0 pl-[18px] text-[13px] leading-[1.75] text-content-2">
             <li>
               点按 Safari 底部的
-              <SquareArrowUp class="pwa-sheet__inline" aria-hidden="true" />「分享」按钮
+              <SquareArrowUp class="mx-px inline size-[15px] align-[-3px] text-accent" aria-hidden="true" />「分享」按钮
             </li>
             <li>
               在菜单中选择
-              <SquarePlus class="pwa-sheet__inline" aria-hidden="true" />「添加到主屏幕」
+              <SquarePlus class="mx-px inline size-[15px] align-[-3px] text-accent" aria-hidden="true" />「添加到主屏幕」
             </li>
             <li>点右上角「添加」即可完成安装</li>
           </ol>
-          <button type="button" class="pwa-sheet__ok" @click="showIosSheet = false">
+          <button
+            type="button"
+            class="mt-3 block w-full cursor-pointer rounded-full bg-surface-weak py-[7px] text-[13px] font-semibold text-content transition-colors duration-200 hover:bg-accent-soft hover:text-accent-strong"
+            @click="showIosSheet = false"
+          >
             知道了
           </button>
-          <span class="pwa-sheet__arrow" aria-hidden="true" />
+          <!-- 指向下方悬浮按钮的小箭头 -->
+          <span
+            class="absolute -bottom-1.5 right-[34px] size-[11px] rotate-45 border-r border-b border-line bg-surface-strong"
+            aria-hidden="true"
+          />
         </div>
       </Transition>
 
-      <div class="pwa-fab">
-        <button type="button" class="pwa-fab__main" aria-label="安装应用" @click="onInstall">
-          <Download class="pwa-fab__icon" aria-hidden="true" />
-          <span class="pwa-fab__label">安装应用</span>
+      <div class="flex items-center gap-0.5 rounded-full border border-line bg-surface-strong p-1 shadow-[var(--shadow-card-lg)]">
+        <button
+          type="button"
+          class="inline-flex cursor-pointer items-center gap-2 rounded-full bg-gradient-to-br from-accent to-accent-strong px-4 py-[9px] font-display text-sm leading-none font-bold text-[#141414] shadow-[var(--shadow-accent)] transition-[transform,box-shadow] duration-200 hover:-translate-y-px hover:shadow-[0_10px_24px_-6px_var(--accent-glow)] active:scale-95 max-[480px]:px-3"
+          aria-label="安装应用"
+          @click="onInstall"
+        >
+          <Download class="size-[17px] animate-[pwa-fab-bounce_2.4s_ease-in-out_infinite]" aria-hidden="true" />
+          <span class="whitespace-nowrap max-[480px]:hidden">安装应用</span>
         </button>
-        <button type="button" class="pwa-fab__close" aria-label="暂不安装" @click="dismiss">
+        <button
+          type="button"
+          class="grid size-[26px] cursor-pointer place-items-center rounded-full bg-transparent text-content-2 transition-colors duration-200 hover:bg-surface-weak hover:text-content"
+          aria-label="暂不安装"
+          @click="dismiss"
+        >
           <X class="size-3.5" aria-hidden="true" />
         </button>
       </div>
@@ -107,162 +130,8 @@ function dismiss() {
   </Transition>
 </template>
 
-<style scoped>
-.pwa-root {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 12px;
-}
-
-.pwa-fab {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px;
-  border: 1px solid var(--surface-border);
-  border-radius: 999px;
-  background: var(--surface-strong);
-  box-shadow: var(--shadow-card-lg);
-}
-
-.pwa-fab__main {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 16px;
-  border: none;
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-  box-shadow: var(--shadow-accent);
-  color: #141414;
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.pwa-fab__main:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px -6px var(--accent-glow);
-}
-
-.pwa-fab__main:active {
-  transform: scale(0.96);
-}
-
-.pwa-fab__icon {
-  width: 17px;
-  height: 17px;
-  animation: pwa-fab-bounce 2.4s ease-in-out infinite;
-}
-
-.pwa-fab__label {
-  white-space: nowrap;
-}
-
-.pwa-fab__close {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border: none;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.pwa-fab__close:hover {
-  background: var(--surface-weak);
-  color: var(--text-primary);
-}
-
-/* ============ iOS 引导卡片 ============ */
-.pwa-sheet {
-  position: relative;
-  width: min(88vw, 300px);
-  padding: 14px 16px 12px;
-  border: 1px solid var(--surface-border);
-  border-radius: 16px;
-  background: var(--surface-strong);
-  box-shadow: var(--shadow-card-lg);
-  color: var(--text-primary);
-}
-
-.pwa-sheet__title {
-  margin: 0 0 8px;
-  font-family: var(--font-display);
-  font-size: 14.5px;
-  font-weight: 700;
-}
-
-.pwa-sheet__steps {
-  margin: 0;
-  padding-left: 18px;
-  font-size: 13px;
-  line-height: 1.75;
-  color: var(--text-secondary);
-}
-
-.pwa-sheet__inline {
-  width: 15px;
-  height: 15px;
-  margin: 0 1px;
-  vertical-align: -3px;
-  color: var(--accent);
-}
-
-.pwa-sheet__ok {
-  display: block;
-  width: 100%;
-  margin-top: 12px;
-  padding: 7px 0;
-  border: none;
-  border-radius: 999px;
-  background: var(--surface-weak);
-  color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.pwa-sheet__ok:hover {
-  background: var(--accent-soft);
-  color: var(--accent-strong);
-}
-
-/* 指向下方悬浮按钮的小箭头 */
-.pwa-sheet__arrow {
-  position: absolute;
-  right: 34px;
-  bottom: -6px;
-  width: 11px;
-  height: 11px;
-  transform: rotate(45deg);
-  border-right: 1px solid var(--surface-border);
-  border-bottom: 1px solid var(--surface-border);
-  background: var(--surface-strong);
-}
-
-/* 小屏只保留图标，避免遮挡内容 */
-@media (max-width: 480px) {
-  .pwa-fab__label {
-    display: none;
-  }
-
-  .pwa-fab__main {
-    padding: 9px 12px;
-  }
-}
-
+<!-- 仅保留 Tailwind 无法表达的部分：关键帧动画与 Vue <Transition> 过渡类 -->
+<style>
 @keyframes pwa-fab-bounce {
   0%,
   100% {
