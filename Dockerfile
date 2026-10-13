@@ -2,6 +2,12 @@
 FROM node:22-bookworm-slim AS builder
 WORKDIR /app
 
+# 国内镜像：corepack 下载 pnpm 二进制、pnpm/npm 拉取依赖统一走 npmmirror，
+# 避免访问 registry.npmjs.org 缓慢（可用 --build-arg NPM_REGISTRY=... 覆盖）
+ARG NPM_REGISTRY=https://registry.npmmirror.com
+ENV COREPACK_NPM_REGISTRY=${NPM_REGISTRY}
+ENV npm_config_registry=${NPM_REGISTRY}
+
 # 启用 pnpm（corepack 按 package.json 的 packageManager 自动匹配版本）
 RUN corepack enable
 
@@ -36,9 +42,17 @@ COPY --from=builder /app/.output ./.output
 COPY --from=builder /app/data ./data
 
 # gosu（Debian 下 su-exec 的等价物）：供入口脚本以 root 修正 /app/.data 属主后降权到 node 用户运行
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends gosu \
-    && rm -rf /var/lib/apt/lists/*
+# 使用国内 Debian 镜像源（阿里云），加速 apt 下载
+RUN set -eux; \
+    if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
+        sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources; \
+    fi; \
+    if [ -f /etc/apt/sources.list ]; then \
+        sed -i 's|deb.debian.org|mirrors.aliyun.com|g; s|security.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list; \
+    fi; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends gosu; \
+    rm -rf /var/lib/apt/lists/*
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
