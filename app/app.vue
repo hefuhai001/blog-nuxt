@@ -13,5 +13,7 @@
     </NuxtLayout>
     <!-- PWA 新版本就绪提示：新 SW 等待激活时弹出，用户确认后刷新页面切换到新版本 -->
     <PwaPrompt />
+    <!-- PWA 安装悬浮按钮：应用可安装时显示在右下角 -->
+    <PwaInstallButton />
   </div>
 </template>

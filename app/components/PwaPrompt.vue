@@ -43,7 +43,8 @@ function reload() {
 .pwa-toast {
   position: fixed;
   right: 20px;
-  bottom: 20px;
+  /* 抬高，给右下角的 PWA 安装悬浮按钮留出位置 */
+  bottom: 84px;
   z-index: 100;
   display: flex;
   align-items: center;
