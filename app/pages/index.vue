@@ -3,11 +3,15 @@ import { ArrowRight, Clock, CodeXml, Container, Folder, Globe } from '@lucide/vu
 import { NuxtLink } from '#components'
 import type { Component } from 'vue'
 import { isArticle, categoryOf, articleTitle, articleHref, bodyTextOf, readingTimeOf } from '~/composables/blog'
-import { mySites } from '~/data/sites'
+import { resolveSiteIcon, type SitesData } from '~/data/sites'
 
 const { data: posts } = await useAsyncData('blog-index', () =>
   queryCollection('blog').order('path', 'ASC').all(),
 )
+
+// 站点导航数据：运行时从 /api/sites 读取（数据源为可挂载的 data/sites.json）
+const { data: sites } = await useFetch<SitesData>('/api/sites', { key: 'sites-nav' })
+const mySites = computed(() => sites.value?.mySites ?? [])
 useHead({ title: 'CodeTrail · 代码轨迹' })
 
 const articles = computed(() => (posts.value ?? []).filter(isArticle))
@@ -121,7 +125,7 @@ function isInternal(url: string): boolean {
           <div
             class="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-(--accent-soft) to-(--surface-weak) text-(--accent) transition-transform duration-300 group-hover:scale-[1.05]"
           >
-            <component :is="site.icon" class="size-6" stroke-width="1.6" aria-hidden="true" />
+            <component :is="resolveSiteIcon(site.icon)" class="size-6" stroke-width="1.6" aria-hidden="true" />
           </div>
           <div class="min-w-0">
             <h3 class="m-0 truncate font-(family-name:--font-display) text-[16px] font-bold text-(--text-primary) transition-colors duration-200 group-hover:text-(--accent)">

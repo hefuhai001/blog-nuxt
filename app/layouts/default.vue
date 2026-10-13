@@ -109,7 +109,17 @@
     </div>
 
     <footer class="relative z-[1] border-t border-(--surface-border) py-8 text-center text-[13px] text-(--text-tertiary)">
-      © {{ new Date().getFullYear() }} CodeTrail · 代码轨迹 · Made with <Zap class="inline size-3.5 align-[-2px] text-(--accent)" aria-hidden="true" /> Nuxt &amp; Tailwind
+      <p class="m-0">
+        © {{ new Date().getFullYear() }} CodeTrail · 代码轨迹 · Made with <Zap class="inline size-3.5 align-[-2px] text-(--accent)" aria-hidden="true" /> Nuxt &amp; Tailwind
+      </p>
+      <p class="m-0 mt-2">
+        <a
+          href="https://beian.miit.gov.cn/"
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+          class="transition-colors duration-200 hover:text-(--accent)"
+        >赣ICP备2025072831号-2</a>
+      </p>
     </footer>
 
     <SearchModal />

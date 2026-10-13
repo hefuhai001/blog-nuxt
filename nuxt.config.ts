@@ -19,6 +19,8 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   compatibilityDate: '2024-04-03',
   runtimeConfig: {
+    // 站点导航数据文件路径；可通过挂载覆盖，或用环境变量 NUXT_SITES_FILE 指定
+    sitesFile: './data/sites.json',
     public: {
       // 部署后改为你的正式域名，如 'https://blog.example.com'
       siteUrl: '',
@@ -36,7 +38,7 @@ export default defineNuxtConfig({
     // 避免旧 HTML 引用已失效的 hash 资源导致出现无样式页面
     registerType: 'prompt',
     manifest: {
-      name: 'CodeTrail · 代码轨迹',
+      name: 'CodeTrail · 代码轨迹 · IT技术学习',
       short_name: 'CodeTrail',
       description: '后端开发与工程实践技术博客，记录 Django、Docker、数据库与日常踩坑的代码轨迹',
       lang: 'zh-CN',

@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { ArrowRight, Compass, ExternalLink, GitBranch, Globe } from '@lucide/vue'
-import { mySites, recommendGroups } from '~/data/sites'
+import { resolveSiteIcon, type SitesData } from '~/data/sites'
 
 useHead({ title: '网址导航 · CodeTrail 代码轨迹' })
+
+// 站点导航数据：运行时从 /api/sites 读取（数据源为可挂载的 data/sites.json）
+const { data: sites } = await useFetch<SitesData>('/api/sites', { key: 'sites-nav' })
+const mySites = computed(() => sites.value?.mySites ?? [])
+const recommendGroups = computed(() => sites.value?.recommendGroups ?? [])
 
 /** 以 / 开头视为站内链接，使用 NuxtLink 打开 */
 function isInternal(url: string): boolean {
@@ -59,7 +64,7 @@ function isInternal(url: string): boolean {
             <div
               class="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-(--accent-soft) to-(--surface-weak) text-(--accent) transition-transform duration-300 group-hover:scale-[1.05]"
             >
-              <component :is="site.icon" class="size-7" stroke-width="1.6" aria-hidden="true" />
+              <component :is="resolveSiteIcon(site.icon)" class="size-7" stroke-width="1.6" aria-hidden="true" />
             </div>
             <div class="min-w-0">
               <h3 class="m-0 font-(family-name:--font-display) text-[17px] font-bold text-(--text-primary) transition-colors duration-200 group-hover:text-(--accent)">
@@ -124,7 +129,7 @@ function isInternal(url: string): boolean {
           v-reveal
           class="m-0 mb-3.5 flex items-center gap-2 font-(family-name:--font-display) text-[15px] font-bold text-(--text-primary)"
         >
-          <component :is="group.icon" class="size-4 text-(--accent)" stroke-width="1.8" aria-hidden="true" />
+          <component :is="resolveSiteIcon(group.icon)" class="size-4 text-(--accent)" stroke-width="1.8" aria-hidden="true" />
           {{ group.category }}
         </h3>
         <div class="grid grid-cols-4 gap-4 max-lg:grid-cols-2 max-sm:grid-cols-1">
@@ -140,7 +145,7 @@ function isInternal(url: string): boolean {
             <div
               class="grid size-10 shrink-0 place-items-center rounded-xl bg-surface-weak text-(--text-secondary) transition-colors duration-200 group-hover:bg-(--accent-soft) group-hover:text-(--accent)"
             >
-              <component :is="s.icon" class="size-5" stroke-width="1.7" aria-hidden="true" />
+              <component :is="resolveSiteIcon(s.icon)" class="size-5" stroke-width="1.7" aria-hidden="true" />
             </div>
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-1.5">
