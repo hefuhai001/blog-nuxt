@@ -54,7 +54,10 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends gosu; \
     rm -rf /var/lib/apt/lists/*
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+# 兜底：去掉可能的 CRLF（Windows 编辑易引入），否则 shebang 变成 #!/bin/sh\r 会报
+# "exec ... no such file or directory"；随后赋予可执行权限
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # 入口脚本负责确保 /app/data 可写（兼容 bind 挂载 / named volume / 历史遗留卷）并降权到 node，
 # 因此不再设置 USER node（须以 root 启动才能 chown）
