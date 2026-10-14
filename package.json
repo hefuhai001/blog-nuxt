@@ -19,6 +19,7 @@
     "@nuxt/image": "2.1.0",
     "@nuxt/ui": "4.11.3",
     "@nuxtjs/color-mode": "^4.0.1",
+    "bcryptjs": "^3.0.3",
     "highlight.js": "^11.11.1",
     "markdown-it": "^14.1.0",
     "markdown-it-anchor": "^9.2.0",

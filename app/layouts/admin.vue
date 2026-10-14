@@ -49,13 +49,14 @@
 </template>
 
 <script setup lang="ts">
-import { FileText, Files, LayoutDashboard, LogOut, Share2 } from '@lucide/vue'
+import { FileText, Files, LayoutDashboard, LogOut, Share2, Users } from '@lucide/vue'
 
 const navItems = [
   { to: '/admin', label: '概览', icon: LayoutDashboard },
   { to: '/admin/posts', label: '文章', icon: FileText },
   { to: '/admin/pages', label: '页面', icon: Files },
   { to: '/admin/nav', label: '网址导航', icon: Share2 },
+  { to: '/admin/users', label: '用户', icon: Users },
 ]
 
 const loggingOut = ref(false)

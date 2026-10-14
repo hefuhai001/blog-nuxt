@@ -38,8 +38,8 @@ ENV HOST=0.0.0.0
 # 可把 host 指到 host.docker.internal 或自定义网络里的服务名。
 # 需要时通过 docker run / compose 注入以下环境变量覆盖 nuxt.config 默认值：
 #   NUXT_DB_HOST / NUXT_DB_PORT / NUXT_DB_USER / NUXT_DB_PASSWORD / NUXT_DB_DATABASE
-# 管理后台账号与会话密钥（生产必须覆盖默认值，会话密钥至少 32 字符）：
-#   NUXT_ADMIN_USER / NUXT_ADMIN_PASSWORD / NUXT_SESSION_PASSWORD
+# 首次建表自动创建的管理员账号与会话密钥（生产必须覆盖默认值，会话密钥至少 32 字符）：
+#   NUXT_SEED_ADMIN_USER / NUXT_SEED_ADMIN_PASSWORD / NUXT_SESSION_PASSWORD
 
 # 拷贝 Nuxt/Nitro 构建产物
 COPY --from=builder /app/.output ./.output

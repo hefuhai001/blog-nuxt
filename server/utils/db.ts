@@ -4,6 +4,7 @@
  * 连接参数来自 runtimeConfig.db（默认本地，可用环境变量覆盖）：
  *   NUXT_DB_HOST / NUXT_DB_PORT / NUXT_DB_USER / NUXT_DB_PASSWORD / NUXT_DB_DATABASE
  */
+import bcrypt from 'bcryptjs'
 import mysql from 'mysql2/promise'
 
 let pool: mysql.Pool | null = null
@@ -135,10 +136,22 @@ async function createSchema(): Promise<void> {
     PRIMARY KEY (id),
     KEY idx_group (group_id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+  // 用户：用户名唯一，密码存 bcrypt 哈希，角色 admin / user
+  await p.query(`CREATE TABLE IF NOT EXISTS users (
+    id            INT          NOT NULL AUTO_INCREMENT,
+    username      VARCHAR(64)  NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role          VARCHAR(16)  NOT NULL DEFAULT 'user',
+    nickname      VARCHAR(64)  NOT NULL DEFAULT '',
+    created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uniq_username (username)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
 }
 
 async function withDb<T>(fn: (pool: mysql.Pool) => Promise<T>): Promise<T> {
-  if (!schemaReady) schemaReady = createSchema()
+  if (!schemaReady) schemaReady = createSchema().then(seedDefaultAdmin)
   await schemaReady
   return fn(getPool())
 }
@@ -462,3 +475,150 @@ export async function getStats(): Promise<{
     }
   })
 }
+
+// ---------------------------------------------------------------------------
+// 用户系统
+// ---------------------------------------------------------------------------
+
+export type UserRole = 'admin' | 'user'
+
+export interface UserPublic {
+  id: number
+  username: string
+  nickname: string
+  role: UserRole
+  createdAt: string
+}
+
+interface UserRow extends mysql.RowDataPacket {
+  id: number
+  username: string
+  password_hash: string
+  role: string
+  nickname: string
+  created_at: Date
+}
+
+function toUser(row: UserRow): UserPublic {
+  return {
+    id: Number(row.id),
+    username: String(row.username),
+    nickname: String(row.nickname ?? ''),
+    role: row.role === 'admin' ? 'admin' : 'user',
+    createdAt: new Date(row.created_at).toISOString(),
+  }
+}
+
+const USER_COLUMNS = 'id, username, password_hash, role, nickname, created_at'
+
+export interface CreateUserInput {
+  username: string
+  password: string
+  nickname?: string
+  role?: UserRole
+}
+
+/** 创建用户：密码用 bcrypt 哈希，用户名需唯一（冲突由数据库唯一索引兜底） */
+export async function createUser(input: CreateUserInput): Promise<UserPublic> {
+  const username = input.username.trim()
+  const nickname = (input.nickname ?? '').trim() || username
+  const role: UserRole = input.role === 'admin' ? 'admin' : 'user'
+  const passwordHash = bcrypt.hashSync(input.password, 10)
+  await withDb(async (p) => {
+    await p.execute(
+      'INSERT INTO users (username, password_hash, role, nickname) VALUES (?, ?, ?, ?)',
+      [username, passwordHash, role, nickname],
+    )
+  })
+  const user = await getUserByName(username)
+  if (!user) throw new Error(`[db] 用户写入后无法读回：${username}`)
+  return {
+    id: user.id,
+    username: user.username,
+    nickname: user.nickname,
+    role: user.role,
+    createdAt: user.createdAt,
+  }
+}
+
+/** 按用户名查询（含密码哈希，登录校验用） */
+export async function getUserByName(username: string): Promise<(UserPublic & { passwordHash: string }) | null> {
+  return withDb(async (p) => {
+    const [rows] = await p.query<UserRow[]>(
+      `SELECT ${USER_COLUMNS} FROM users WHERE username = ? LIMIT 1`,
+      [username.trim()],
+    )
+    const row = rows[0]
+    if (!row) return null
+    return { ...toUser(row), passwordHash: String(row.password_hash) }
+  })
+}
+
+/** 按 id 查询（不含密码哈希） */
+export async function getUserById(id: number): Promise<UserPublic | null> {
+  return withDb(async (p) => {
+    const [rows] = await p.query<UserRow[]>(
+      `SELECT ${USER_COLUMNS} FROM users WHERE id = ? LIMIT 1`,
+      [id],
+    )
+    const row = rows[0]
+    return row ? toUser(row) : null
+  })
+}
+
+/** 全部用户（按 id 升序） */
+export async function listUsers(): Promise<UserPublic[]> {
+  return withDb(async (p) => {
+    const [rows] = await p.query<UserRow[]>(`SELECT ${USER_COLUMNS} FROM users ORDER BY id ASC`)
+    return rows.map(toUser)
+  })
+}
+
+/** 修改用户角色，返回刷新后的用户 */
+export async function updateUserRole(id: number, role: UserRole): Promise<UserPublic | null> {
+  const safeRole: UserRole = role === 'admin' ? 'admin' : 'user'
+  await withDb(async (p) => {
+    await p.execute('UPDATE users SET role = ? WHERE id = ?', [safeRole, id])
+  })
+  return getUserById(id)
+}
+
+/** 删除用户，返回是否删除了记录 */
+export async function deleteUser(id: number): Promise<boolean> {
+  return withDb(async (p) => {
+    const [result] = await p.execute<mysql.ResultSetHeader>('DELETE FROM users WHERE id = ?', [id])
+    return result.affectedRows > 0
+  })
+}
+
+/** 用户总数 */
+export async function countUsers(): Promise<number> {
+  return withDb(async (p) => {
+    const [rows] = await p.query<(mysql.RowDataPacket & { total: number })[]>('SELECT COUNT(*) AS total FROM users')
+    return Number(rows[0]?.total ?? 0)
+  })
+}
+
+/**
+ * 首次建表后若用户表为空，则自动种子一个管理员。
+ * 账号密码取自 runtimeConfig.seedAdminUser / seedAdminPassword（可用环境变量覆盖）。
+ * 仅在空表时执行，不会覆盖既有用户。
+ *
+ * 注意：此处直接使用连接池（而非 withDb 公共函数），因为 withDb 会 await schemaReady，
+ * 而本函数正是 schemaReady 链条的一部分，避免自引用死锁。
+ */
+async function seedDefaultAdmin(): Promise<void> {
+  const p = getPool()
+  const [rows] = await p.query<(mysql.RowDataPacket & { total: number })[]>('SELECT COUNT(*) AS total FROM users')
+  if (Number(rows[0]?.total ?? 0) > 0) return
+
+  const config = useRuntimeConfig()
+  const username = String(config.seedAdminUser || 'admin').trim() || 'admin'
+  const password = String(config.seedAdminPassword || 'admin123')
+  const passwordHash = bcrypt.hashSync(password, 10)
+  await p.execute(
+    'INSERT INTO users (username, password_hash, role, nickname) VALUES (?, ?, ?, ?)',
+    [username, passwordHash, 'admin', '管理员'],
+  )
+}
+

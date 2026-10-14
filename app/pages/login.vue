@@ -16,7 +16,7 @@
           <span>CodeTrail <span class="text-(--accent)">·</span> 代码轨迹</span>
         </NuxtLink>
         <h1 class="mt-4 text-lg font-bold text-(--text-primary)">
-          管理后台登录
+          登录
         </h1>
       </div>
 
@@ -59,6 +59,13 @@
         </button>
 
         <NuxtLink
+          to="/register"
+          class="text-center text-[13px] text-(--text-secondary) transition-colors duration-200 hover:text-(--accent)"
+        >
+          没有账号？<span class="font-semibold text-(--accent)">立即注册</span>
+        </NuxtLink>
+
+        <NuxtLink
           to="/"
           class="text-center text-[13px] text-(--text-tertiary) transition-colors duration-200 hover:text-(--accent)"
         >
@@ -83,14 +90,16 @@ async function submit() {
   error.value = ''
   loading.value = true
   try {
-    await $fetch('/api/auth/login', {
+    const res = await $fetch<{ user: { name: string; nickname: string; role: 'admin' | 'user' } }>('/api/auth/login', {
       method: 'POST',
       body: { username: username.value, password: password.value },
     })
-    const redirect = typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/')
-      ? route.query.redirect
-      : '/admin'
-    await navigateTo(redirect)
+    // 优先跳回来源页；否则按角色分流：管理员进后台，普通用户进个人中心
+    const raw = typeof route.query.redirect === 'string' ? route.query.redirect : ''
+    const home = res.user.role === 'admin' ? '/admin' : '/account'
+    const canUseRedirect = raw.startsWith('/')
+      && (raw.startsWith('/admin') ? res.user.role === 'admin' : true)
+    await navigateTo(canUseRedirect ? raw : home)
   }
   catch (err: unknown) {
     const e = err as { data?: { statusMessage?: string }; statusMessage?: string }
