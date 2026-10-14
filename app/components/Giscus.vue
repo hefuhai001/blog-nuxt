@@ -5,7 +5,7 @@
  * repo / repoId / category / categoryId（GitHub Discussion 相关配置），
  * 未配置时自动不渲染。
  */
-const props = defineProps<{ term: string }>()
+defineProps<{ term: string }>()
 
 interface GiscusConfig {
   repo: string

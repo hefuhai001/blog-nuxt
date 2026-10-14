@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ArrowRight, Clock, CodeXml, Container, Folder, FolderOpen, Flame } from '@lucide/vue'
 import type { Component } from 'vue'
-import { isArticle, categoryOf, articleTitle, articleHref, bodyTextOf, readingTimeOf } from '~/composables/blog'
+import { isArticle, categoryOf, articleTitle, articleHref, bodyTextOf, readingTimeOf, type ContentItem } from '~/composables/blog'
 
 const { data: posts } = await useAsyncData('blog-index', () =>
   queryCollection('blog').order('path', 'ASC').all(),
@@ -10,17 +10,17 @@ useHead({ title: '博客文章 · CodeTrail 代码轨迹' })
 
 const articles = computed(() => (posts.value ?? []).filter(isArticle))
 
-function excerptOf(post: any, len = 86): string {
+function excerptOf(post: unknown, len = 86): string {
   const text = bodyTextOf(post)
   return text.length > len ? `${text.slice(0, len)}…` : text
 }
 
-function metaOf(post: any): string {
+function metaOf(post: unknown): string {
   return `${readingTimeOf(post)} 分钟阅读`
 }
 
-const grouped = computed<Record<string, any[]>>(() => {
-  const map: Record<string, any[]> = {}
+const grouped = computed<Record<string, ContentItem[]>>(() => {
+  const map: Record<string, ContentItem[]> = {}
   for (const post of articles.value) {
     const cat = categoryOf(post)
     ;(map[cat] ||= []).push(post)

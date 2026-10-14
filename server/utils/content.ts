@@ -1,8 +1,12 @@
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
 /** 从 Nuxt Content v3 的 body（minimark 树）提取纯文本 */
-export function extractBodyText(doc: any): string {
+export function extractBodyText(doc: unknown): string {
   if (!doc) return ''
   const parts: string[] = []
-  const walk = (node: any) => {
+  const walk = (node: unknown): void => {
     if (node == null) return
     if (typeof node === 'string') {
       parts.push(node)
@@ -12,13 +16,14 @@ export function extractBodyText(doc: any): string {
       for (const child of node) walk(child)
       return
     }
-    if (typeof node === 'object') {
+    if (isRecord(node)) {
       if (node.type === 'text' && typeof node.value === 'string') parts.push(node.value)
       if (Array.isArray(node.children)) for (const child of node.children) walk(child)
       else if (Array.isArray(node.value)) for (const child of node.value) walk(child)
     }
   }
-  walk(doc.body ?? doc)
+  const source = isRecord(doc) ? (doc.body ?? doc) : doc
+  walk(source)
   return parts.join(' ').replace(/\s+/g, ' ').trim()
 }
 

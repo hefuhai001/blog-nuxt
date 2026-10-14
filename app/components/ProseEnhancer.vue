@@ -54,7 +54,6 @@ function attachCopyButton(pre: HTMLPreElement) {
 }
 
 /* ---------------- Lightbox ---------------- */
-const overlay = ref<HTMLDivElement | null>(null)
 const lightboxIndex = ref(0)
 const lightboxImages = ref<HTMLImageElement[]>([])
 

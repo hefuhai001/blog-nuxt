@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, Clock, CodeXml, Container, Folder, Globe } from '@lucide/vue'
+import { ArrowRight, Clock, CodeXml, Container, Folder } from '@lucide/vue'
 import { NuxtLink } from '#components'
 import type { Component } from 'vue'
 import { isArticle, categoryOf, articleTitle, articleHref, bodyTextOf, readingTimeOf } from '~/composables/blog'
@@ -23,7 +23,7 @@ const recommended = computed(() =>
     .slice(0, 6),
 )
 
-function excerptOf(post: any, len = 86): string {
+function excerptOf(post: unknown, len = 86): string {
   const text = bodyTextOf(post)
   return text.length > len ? `${text.slice(0, len)}…` : text
 }

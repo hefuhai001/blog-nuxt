@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { articleTitle, articleHref } from '~/composables/blog'
+import { articleTitle, articleHref, type ContentItem } from '~/composables/blog'
 
 defineProps<{
-  items: any[]
+  items: ContentItem[]
   category: string
 }>()
 </script>

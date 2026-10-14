@@ -1,11 +1,28 @@
-type BlogItem = {
+/**
+ * Nuxt Content v3 集合项在运行时结构较宽松（数据来自 DB 查询），
+ * 这里统一以 unknown 接收、在函数内部收窄，避免使用 any。
+ */
+
+/** 页面 / 组件中引用的内容项（用于 props 与局部类型标注） */
+export interface ContentItem {
   id: string
   path?: string
   title?: string
 }
 
-/** 集合项可能为 null（如详情页在守卫前的 computed 值） */
-type MaybeBlogItem = BlogItem | null | undefined
+/** 目录项：拍平后的标题，带层级 */
+export type TocItem = { id: string; text: string; depth: number }
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+/** 安全读取字符串字段 */
+function stringField(source: unknown, key: string): string | undefined {
+  if (!isRecord(source)) return undefined
+  const value = source[key]
+  return typeof value === 'string' ? value : undefined
+}
 
 /**
  * Nuxt Content 集合项的 id 形如 `blog/blog/django/本地文件上传.md`：
@@ -15,40 +32,42 @@ type MaybeBlogItem = BlogItem | null | undefined
  */
 function partsOf(id?: string): string[] {
   if (!id) return []
-  return String(id).replace(/\.md$/, '').split('/').slice(2)
+  return id.replace(/\.md$/, '').split('/').slice(2)
 }
 
 /** 是否为真实文章项（目录索引项没有 .md 后缀） */
-export function isArticle(item: MaybeBlogItem): boolean {
-  return !!item?.id && String(item.id).endsWith('.md')
+export function isArticle(item: unknown): boolean {
+  const id = stringField(item, 'id')
+  return !!id && id.endsWith('.md')
 }
 
 /** 当前文章所属分类（一级目录名，如 django / docker） */
-export function categoryOf(item: MaybeBlogItem): string {
-  return item ? partsOf(item.id)[0] || '未分类' : '未分类'
+export function categoryOf(item: unknown): string {
+  return partsOf(stringField(item, 'id'))[0] || '未分类'
 }
 
 /** 文章标题：优先 Nuxt Content 自动生成的 title，回退到文件名 */
-export function articleTitle(item: MaybeBlogItem): string {
-  if (!item) return ''
-  if (item.title) return item.title
-  const parts = partsOf(item.id)
+export function articleTitle(item: unknown): string {
+  const title = stringField(item, 'title')
+  if (title) return title
+  const parts = partsOf(stringField(item, 'id'))
   return parts[parts.length - 1] ?? ''
 }
 
 /** 文章详情页 URL（用原始中文路径，唯一） */
-export function articleHref(item: MaybeBlogItem): string {
-  return item ? `/blog/${partsOf(item.id).join('/')}` : '#'
+export function articleHref(item: unknown): string {
+  if (!item) return '#'
+  return `/blog/${partsOf(stringField(item, 'id')).join('/')}`
 }
 
 /**
  * 从 Nuxt Content v3 的 body（minimark 树）中提取纯文本。
  * minimark 元素为 `[tag, props, ...children]`，文本节点即字符串。
  */
-export function bodyTextOf(doc: any): string {
+export function bodyTextOf(doc: unknown): string {
   if (!doc) return ''
   const parts: string[] = []
-  const walk = (node: any) => {
+  const walk = (node: unknown): void => {
     if (node == null) return
     if (typeof node === 'string') {
       parts.push(node)
@@ -58,18 +77,19 @@ export function bodyTextOf(doc: any): string {
       for (const child of node) walk(child)
       return
     }
-    if (typeof node === 'object') {
+    if (isRecord(node)) {
       if (node.type === 'text' && typeof node.value === 'string') parts.push(node.value)
       if (Array.isArray(node.children)) for (const child of node.children) walk(child)
       else if (Array.isArray(node.value)) for (const child of node.value) walk(child)
     }
   }
-  walk(doc.body ?? doc)
+  const source = isRecord(doc) ? (doc.body ?? doc) : doc
+  walk(source)
   return parts.join(' ').replace(/\s+/g, ' ').trim()
 }
 
 /** 估算阅读时长（中文按 350 字/分钟，英文按 200 词/分钟） */
-export function readingTimeOf(doc: any): number {
+export function readingTimeOf(doc: unknown): number {
   const text = bodyTextOf(doc)
   if (!text) return 0
   const cjk = (text.match(/[\u4e00-\u9fff]/g) ?? []).length
@@ -79,22 +99,29 @@ export function readingTimeOf(doc: any): number {
 }
 
 /** 正文总字数（用于展示） */
-export function wordCountOf(doc: any): number {
+export function wordCountOf(doc: unknown): number {
   const text = bodyTextOf(doc)
   if (!text) return 0
   return text.replace(/\s+/g, '').length
 }
 
 /** 目录：取 body.toc.links，并拍平成带 depth 的列表供滚动高亮 */
-export type TocItem = { id: string; text: string; depth: number }
-export function tocOf(doc: any): TocItem[] {
-  const links = doc?.body?.toc?.links
+export function tocOf(doc: unknown): TocItem[] {
+  const body = isRecord(doc) ? doc.body : undefined
+  const toc = isRecord(body) ? body.toc : undefined
+  const links = isRecord(toc) ? toc.links : undefined
   if (!Array.isArray(links)) return []
+
   const out: TocItem[] = []
-  const walk = (items: any[], depth: number) => {
+  const walk = (items: unknown[], depth: number): void => {
     for (const item of items) {
-      if (!item?.id) continue
-      out.push({ id: item.id, text: item.text || item.title, depth: depth })
+      if (!isRecord(item)) continue
+      const id = item.id
+      if (typeof id !== 'string') continue
+      const text = typeof item.text === 'string'
+        ? item.text
+        : typeof item.title === 'string' ? item.title : ''
+      out.push({ id, text, depth })
       if (Array.isArray(item.children)) walk(item.children, depth + 1)
     }
   }
