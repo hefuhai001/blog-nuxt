@@ -2,31 +2,32 @@ version: "1.0"
 name: 测试、构建、上传、发布、部署到自有主机
 displayName: 测试、构建、上传、发布、部署到自有主机
 stages:
-- name: 测试
-  displayName: 测试
+- name: 代码检查
+  displayName: 代码检查
   strategy: naturally
   trigger: auto
   steps:
   - step: ut@nodejs
     name: ""
-    displayName: Nodejs 单元测试
+    displayName: 依赖安装 · ESLint · 类型检查
     nodeVersion: 22.22.0
     commands:
-    - "# 设置NPM源，提升安装速度"
+    - "# 设置 NPM 源，提升安装速度（pnpm 同样读取 ~/.npmrc）"
     - npm config set registry https://registry.npmmirror.com
-    - "# 在这里输入测试命令"
-    - npm install && npm run test
-    report:
-      path: mochawesome-report
-      index: mochawesome.html
-    checkpoints:
-      key: TestPassRate
-      relationalOperator: '>='
-      value: "0"
-      logicalOperator: '&&'
+    - "# corepack 下载 pnpm 也走国内源（仅影响下载速度，不设置也能跑通）"
+    - export COREPACK_NPM_REGISTRY=https://registry.npmmirror.com
+    - "# 启用 corepack，使用与 Dockerfile 构建阶段一致的 pnpm"
+    - corepack enable
+    - "# 严格按锁文件安装；postinstall 会执行 nuxt prepare，生成类型与 .nuxt/eslint.config.mjs"
+    - pnpm install --frozen-lockfile
+    - "# 代码规范检查（0 error 才通过）"
+    - pnpm lint
+    - "# 类型检查：本项目 tsconfig 是 solution-style，必须用 build 模式，vue-tsc --noEmit 会空跑"
+    - pnpm exec vue-tsc -b
     caches:
     - "~/.npm"
-    - "~/.yarn"
+    - "~/.cache/pnpm"
+    - "~/.cache/node/corepack"
     notify: []
     strategy:
       retry: "0"
@@ -40,22 +41,29 @@ stages:
   steps:
   - step: build@nodejs
     name: _1
-    displayName: Nodejs 构建
+    displayName: 校验构建并打包源码制品
     nodeVersion: 22.22.0
     commands:
-    - "# 设置NPM源，提升安装速度"
+    - "# 设置 NPM 源，提升安装速度"
     - npm config set registry https://registry.npmmirror.com
-    - ""
-    - "# 执行编译命令"
-    - npm install && npm run build
+    - export COREPACK_NPM_REGISTRY=https://registry.npmmirror.com
+    - corepack enable
+    - pnpm install --frozen-lockfile
+    - "# 先在 CI 侧验证生产构建能过（真正的镜像构建在服务器上由 docker compose build 执行）"
+    - pnpm build
+    - "# 清理构建期产物与运行时数据，只把「源码 + Docker 部署文件」打进制品："
+    - "#   node_modules / .output / .nuxt / .cache 会在服务器 docker build 时重新生成；"
+    - "#   data/content 是运行时 SQLite 数据库，绝不能覆盖服务器上的持久化数据"
+    - rm -rf node_modules .output .nuxt .cache .data data/content
     artifacts:
     - name: BUILD_ARTIFACT
       path:
-      - ./dist
+      - ./
       type: .tar.gz
     caches:
     - "~/.npm"
-    - "~/.yarn"
+    - "~/.cache/pnpm"
+    - "~/.cache/node/corepack"
     notify: []
     strategy:
       retry: "0"
@@ -102,7 +110,7 @@ stages:
   steps:
   - step: deploy@agent
     name: _4
-    displayName: 主机部署
+    displayName: 主机部署（docker compose 构建并滚动更新）
     deployArtifact:
     - name: output
       target: "~/gitee_go/deploy"
@@ -112,9 +120,37 @@ stages:
       artifactName: output
       artifactVersion: latest
     script: |-
-      # 请在此输入部署脚本，如启动Java应用如下
-      # nohup java -jar test.jar &gt; nohup.out &amp;
-       echo 'Hello Gitee!'
+      set -e
+
+      cd "$HOME/gitee_go/deploy"
+      if [ ! -f docker-compose.yml ]; then
+        echo "错误：当前目录未找到 docker-compose.yml，实际目录为 $(pwd)"
+        ls -la
+        exit 1
+      fi
+
+      # docker compose v2 优先，若服务器仅有 v1 则自动回退
+      if command -v docker-compose >/dev/null 2>&1 && ! docker compose version >/dev/null 2>&1; then
+        COMPOSE="docker-compose"
+      else
+        COMPOSE="docker compose"
+      fi
+      echo "使用：$COMPOSE"
+
+      # docker-compose.yml 中 webnet 声明为 external，首次部署需先创建
+      docker network inspect webnet >/dev/null 2>&1 || docker network create webnet
+
+      # 构建镜像：Dockerfile 内部会重新安装依赖并执行 nuxt build
+      $COMPOSE build
+
+      # 滚动更新容器（存在则重建，不存在则创建）
+      $COMPOSE up -d --remove-orphans
+
+      # 清理构建产生的悬空镜像，避免服务器磁盘被旧镜像层占满
+      docker image prune -f
+
+      # 输出最终状态，便于在流水线日志中确认
+      $COMPOSE ps
     hostGroupID:
       ID: hfh
       hostID:
@@ -122,6 +158,9 @@ stages:
     notify: []
     strategy:
       retry: "0"
+      resource:
+        cpu: "2"
+        memory: "2"
 triggers:
   trigger: manual
 notify: []
