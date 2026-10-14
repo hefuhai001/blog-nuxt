@@ -9,7 +9,7 @@ stages:
   steps:
   - step: ut@nodejs
     name: ""
-    displayName: 依赖安装 · ESLint · 类型检查
+    displayName: ESLint
     nodeVersion: 22.22.0
     commands:
     - "# 设置 NPM 源，提升安装速度（pnpm 同样读取 ~/.npmrc）"
@@ -24,6 +24,9 @@ stages:
     - pnpm lint
     - "# 类型检查：本项目 tsconfig 是 solution-style，必须用 build 模式，vue-tsc --noEmit 会空跑"
     - pnpm exec vue-tsc -b
+    report:
+      path: mochawesome-report
+      index: mochawesome-report
     caches:
     - "~/.npm"
     - "~/.cache/pnpm"
@@ -32,8 +35,8 @@ stages:
     strategy:
       retry: "0"
       resource:
-        cpu: "2"
-        memory: "4"
+        cpu: "1"
+        memory: "2"
 - name: 构建
   displayName: 构建
   strategy: naturally
@@ -68,8 +71,8 @@ stages:
     strategy:
       retry: "0"
       resource:
-        cpu: "2"
-        memory: "4"
+        cpu: "1"
+        memory: "2"
 - name: 上传
   displayName: 上传
   strategy: naturally
@@ -110,7 +113,7 @@ stages:
   steps:
   - step: deploy@agent
     name: _4
-    displayName: 主机部署（docker compose 构建并滚动更新）
+    displayName: docker compose up -d
     deployArtifact:
     - name: output
       target: "~/gitee_go/deploy"
@@ -156,11 +159,8 @@ stages:
       hostID:
       - 4bf1e6be-1518-4300-8f44-a04191bea90c
     notify: []
-    # 注意：主机部署（deploy@agent）步骤不能带 step 级 strategy / resource！
-    # 否则 Gitee 后端反序列化时字段会同时命中 JobCenterJobData（resource）与
-    # GiteeDeployJobData（hostGroupID / deployArtifact / script），抛出
-    # "Ambiguous BaseJobData payload: fields match more than one host executor type"。
-    # retry 默认为 0、cpu/memory 对主机部署也无意义，去掉无任何功能损失。
+    strategy:
+      retry: "0"
 triggers:
   trigger: manual
 notify: []
