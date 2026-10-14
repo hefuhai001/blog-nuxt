@@ -24,3 +24,5 @@ logs
 
 *.tar
 *.sqlite
+.trae
+
