@@ -2,12 +2,8 @@
 import { Keyboard } from '@lucide/vue'
 import { isArticle, categoryOf, bodyTextOf, readingTimeOf } from '~/composables/blog'
 
-const { data: posts } = await useAsyncData('about-posts', () =>
-  queryCollection('blog').order('path', 'ASC').all(),
-)
-const { data: about } = await useAsyncData('about-page', () =>
-  queryCollection('content').path('/about').first(),
-)
+const { data: posts } = await useFetch('/api/posts')
+const { data: about } = await useFetch('/api/pages/about')
 useHead({ title: '关于本站 · CodeTrail 代码轨迹' })
 
 const articles = computed(() => (posts.value ?? []).filter(isArticle))
@@ -63,7 +59,7 @@ const stack = ['Nuxt 4', 'Vue 3', 'TypeScript', 'Tailwind CSS v4', 'Nuxt Content
     <!-- 详细说明 -->
     <section v-reveal="{ delay: 140 }" class="card mt-6">
       <div class="markdown-content">
-        <ContentRenderer v-if="about" :value="about" />
+        <div v-if="about" v-html="about.html" />
       </div>
     </section>
   </div>

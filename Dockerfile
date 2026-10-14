@@ -34,9 +34,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOST=0.0.0.0
-# Nuxt Content 运行时 SQLite 需落在可写目录：指向 data/（挂载出来可持久化），
-# 否则默认相对路径会被解析到只读的 .output 目录，导致 SQLITE_CANTOPEN
-ENV NUXT_CONTENT_DATABASE_FILENAME=/app/data/content/contents.sqlite
+# 内容数据库改用本地 MySQL（db_blog_nuxt）。容器内如走宿主机 MySQL，
+# 可把 host 指到 host.docker.internal 或自定义网络里的服务名。
+# 需要时通过 docker run / compose 注入以下环境变量覆盖 nuxt.config 默认值：
+#   NUXT_DB_HOST / NUXT_DB_PORT / NUXT_DB_USER / NUXT_DB_PASSWORD / NUXT_DB_DATABASE
 
 # 拷贝 Nuxt/Nitro 构建产物
 COPY --from=builder /app/.output ./.output

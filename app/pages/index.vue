@@ -5,9 +5,7 @@ import type { Component } from 'vue'
 import { isArticle, categoryOf, articleTitle, articleHref, bodyTextOf, readingTimeOf } from '~/composables/blog'
 import { resolveSiteIcon, type SitesData } from '~/data/sites'
 
-const { data: posts } = await useAsyncData('blog-index', () =>
-  queryCollection('blog').order('path', 'ASC').all(),
-)
+const { data: posts } = await useFetch('/api/posts')
 
 // 站点导航数据：运行时从 /api/sites 读取（数据源为可挂载的 data/sites.json）
 const { data: sites } = await useFetch<SitesData>('/api/sites', { key: 'sites-nav' })

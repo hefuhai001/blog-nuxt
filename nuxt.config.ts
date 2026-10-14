@@ -3,7 +3,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
   modules: [
-    '@nuxt/content',
     '@nuxtjs/color-mode',
     '@vite-pwa/nuxt',
     '@nuxt/eslint',
@@ -11,17 +10,6 @@ export default defineNuxtConfig({
     '@nuxt/image', 
     '@nuxt/ui'
   ],
-  content: {
-    // 开发/构建期的本地数据库统一落到 data/（不再使用 .data）
-    _localDatabase: {
-      type: 'sqlite',
-      filename: 'data/content/contents.sqlite',
-    },
-    // 运行时数据库路径由容器环境变量 NUXT_CONTENT_DATABASE_FILENAME 指定为
-    // /app/data/content/contents.sqlite（见 Dockerfile）。默认的相对路径会被解析到
-    // 只读的 .output 目录，导致 SQLITE_CANTOPEN。
-    // 如需在非容器环境运行构建产物，请设置同名环境变量为可写的绝对路径。
-  },
   colorMode: {
     classSuffix: '',
     preference: 'dark',
@@ -30,12 +18,32 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   vite: {
     plugins: [tailwindcss()],
+    ssr: {
+      // 让 SSR 构建把 lucide 图标组件与应用的 Vue 实例打进同一份运行时，
+      // 否则外部化的 @lucide/vue 会 require 到另一份 Vue，导致 SSR 渲染时
+      // inject() 取不到当前实例（图标组件报错）。
+      noExternal: ['@lucide/vue'],
+    },
+  },
+  nitro: {
+    externals: {
+      inline: [/^@lucide\/vue/],
+    },
   },
   devtools: { enabled: true },
   compatibilityDate: '2024-04-03',
   runtimeConfig: {
     // 站点导航数据文件路径；可通过挂载覆盖，或用环境变量 NUXT_SITES_FILE 指定
     sitesFile: './data/sites.json',
+    // 内容数据库（本地 MySQL）；可用环境变量覆盖：
+    // NUXT_DB_HOST / NUXT_DB_PORT / NUXT_DB_USER / NUXT_DB_PASSWORD / NUXT_DB_DATABASE
+    db: {
+      host: 'localhost',
+      port: 3306,
+      user: 'root',
+      password: 'root@XH2001!',
+      database: 'db_blog_nuxt',
+    },
     public: {
       // 部署后改为你的正式域名，如 'https://blog.example.com'
       siteUrl: '',

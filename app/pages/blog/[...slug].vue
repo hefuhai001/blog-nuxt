@@ -2,33 +2,51 @@
 import { Clock } from '@lucide/vue'
 import {
   isArticle,
-  categoryOf,
-  articleTitle,
   articleHref,
-  readingTimeOf,
-  wordCountOf,
+  articleTitle,
   tocOf,
 } from '~/composables/blog'
 
+interface PostDetail {
+  id: string
+  slug: string
+  category: string
+  title: string
+  description: string
+  text: string
+  words: number
+  readingTime: number
+  html: string
+  toc: Array<{ id: string, text: string, depth: number }>
+}
+
 const route = useRoute()
 const slugParts = (route.params.slug as string[]) ?? []
-const targetId = `blog/blog/${slugParts.join('/')}.md`
 
-const { data: posts } = await useAsyncData(`blog-detail-${slugParts.join('/')}`, () =>
-  queryCollection('blog').order('id', 'ASC').all(),
-)
+// 列表：用于上一篇 / 下一篇与相关推荐
+const { data: posts } = await useFetch('/api/posts')
 
-const articles = computed(() => (posts.value ?? []).filter(isArticle))
-
-const doc = computed(() => articles.value.find((a) => a.id === targetId) ?? null)
+// 详情：服务端渲染好的 HTML 与目录
+const detailUrl = `/api/posts/${slugParts.map(encodeURIComponent).join('/')}`
+const { data: doc } = await useFetch<PostDetail>(detailUrl)
 
 if (!doc.value) {
   throw createError({ statusCode: 404, statusMessage: '文章不存在', fatal: true })
 }
 
+const articles = computed(() => (posts.value ?? []).filter(isArticle))
+
+const targetId = computed(() => doc.value?.id ?? '')
+const categoryName = computed(() => doc.value?.category ?? '未分类')
+const category = computed(() => categoryName.value.toUpperCase())
+const title = computed(() => doc.value?.title ?? '')
+const readingTime = computed(() => doc.value?.readingTime ?? 0)
+const wordCount = computed(() => doc.value?.words ?? 0)
+const toc = computed(() => tocOf(doc.value))
+
 // 上一篇 / 下一篇
 const index = computed(() =>
-  articles.value.findIndex((a) => a.id === targetId),
+  articles.value.findIndex((a) => a.id === targetId.value),
 )
 const prev = computed(() => {
   const i = index.value
@@ -39,16 +57,9 @@ const next = computed(() => {
   return i >= 0 && i < articles.value.length - 1 ? articles.value[i + 1] : null
 })
 
-const categoryName = computed(() => categoryOf(doc.value))
-const category = computed(() => categoryName.value.toUpperCase())
-const title = computed(() => articleTitle(doc.value))
-const readingTime = computed(() => readingTimeOf(doc.value))
-const wordCount = computed(() => wordCountOf(doc.value))
-const toc = computed(() => tocOf(doc.value))
-
 // 相关推荐：同分类下除当前文章外的前 6 篇
 const related = computed(() =>
-  articles.value.filter((a) => a.id !== targetId && categoryOf(a) === categoryName.value).slice(0, 6),
+  articles.value.filter((a) => a.id !== targetId.value && (a.category ?? '未分类') === categoryName.value).slice(0, 6),
 )
 
 useHead(() => ({
@@ -81,7 +92,7 @@ useHead(() => ({
     >
       <div class="markdown-content">
         <ProseEnhancer>
-          <ContentRenderer :value="doc" />
+          <div v-html="doc.html" />
         </ProseEnhancer>
       </div>
       <ArticleToc v-if="toc.length" :items="toc" />

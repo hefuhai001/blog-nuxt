@@ -1,21 +1,16 @@
 import { defineEventHandler } from 'h3'
-import { queryCollection } from '@nuxt/content/server'
-import { extractBodyText, articleUrlOf } from '../utils/content'
+import { articleUrlOf } from '../utils/content'
 import { getSiteBase, xmlEscape } from '../utils/url'
 
 /** RSS 2.0 订阅源 */
 export default defineEventHandler(async (event) => {
   const base = getSiteBase(event)
-  const posts = await queryCollection(event, 'blog')
-    .where('extension', '=', 'md')
-    .select('id', 'title', 'body')
-    .order('id', 'ASC')
-    .all()
+  const posts = await listPosts()
 
   const items = posts
     .map((p) => {
       const url = `${base}${articleUrlOf(p.id)}`
-      const excerpt = xmlEscape(extractBodyText(p).slice(0, 200))
+      const excerpt = xmlEscape(p.text.slice(0, 200))
       const title = xmlEscape(p.title || '')
       return `    <item>
       <title>${title}</title>

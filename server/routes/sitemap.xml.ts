@@ -1,16 +1,11 @@
 import { defineEventHandler } from 'h3'
-import { queryCollection } from '@nuxt/content/server'
 import { articleUrlOf } from '../utils/content'
 import { getSiteBase, xmlEscape } from '../utils/url'
 
 /** XML Sitemap */
 export default defineEventHandler(async (event) => {
   const base = getSiteBase(event)
-  const posts = await queryCollection(event, 'blog')
-    .where('extension', '=', 'md')
-    .select('id')
-    .order('id', 'ASC')
-    .all()
+  const posts = await listPosts()
 
   const urls = [
     '',

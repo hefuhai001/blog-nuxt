@@ -3,9 +3,7 @@ import { ArrowRight, Clock, CodeXml, Container, Folder, FolderOpen, Flame } from
 import type { Component } from 'vue'
 import { isArticle, categoryOf, articleTitle, articleHref, bodyTextOf, readingTimeOf, type ContentItem } from '~/composables/blog'
 
-const { data: posts } = await useAsyncData('blog-index', () =>
-  queryCollection('blog').order('path', 'ASC').all(),
-)
+const { data: posts } = await useFetch('/api/posts')
 useHead({ title: '博客文章 · CodeTrail 代码轨迹' })
 
 const articles = computed(() => (posts.value ?? []).filter(isArticle))

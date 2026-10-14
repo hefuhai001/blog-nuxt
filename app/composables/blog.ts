@@ -8,6 +8,10 @@ export interface ContentItem {
   id: string
   path?: string
   title?: string
+  category?: string
+  text?: string
+  words?: number
+  readingTime?: number
 }
 
 /** 目录项：拍平后的标题，带层级 */
@@ -60,71 +64,39 @@ export function articleHref(item: unknown): string {
   return `/blog/${partsOf(stringField(item, 'id')).join('/')}`
 }
 
-/**
- * 从 Nuxt Content v3 的 body（minimark 树）中提取纯文本。
- * minimark 元素为 `[tag, props, ...children]`，文本节点即字符串。
- */
+/** 安全读取数字字段 */
+function numberField(source: unknown, key: string): number | undefined {
+  if (!isRecord(source)) return undefined
+  const value = source[key]
+  return typeof value === 'number' ? value : undefined
+}
+
+/** 正文纯文本（由导入时预计算并存入数据库的 plain_text 字段） */
 export function bodyTextOf(doc: unknown): string {
-  if (!doc) return ''
-  const parts: string[] = []
-  const walk = (node: unknown): void => {
-    if (node == null) return
-    if (typeof node === 'string') {
-      parts.push(node)
-      return
-    }
-    if (Array.isArray(node)) {
-      for (const child of node) walk(child)
-      return
-    }
-    if (isRecord(node)) {
-      if (node.type === 'text' && typeof node.value === 'string') parts.push(node.value)
-      if (Array.isArray(node.children)) for (const child of node.children) walk(child)
-      else if (Array.isArray(node.value)) for (const child of node.value) walk(child)
-    }
-  }
-  const source = isRecord(doc) ? (doc.body ?? doc) : doc
-  walk(source)
-  return parts.join(' ').replace(/\s+/g, ' ').trim()
+  return stringField(doc, 'text') ?? ''
 }
 
-/** 估算阅读时长（中文按 350 字/分钟，英文按 200 词/分钟） */
+/** 阅读时长（分钟，由导入时预计算） */
 export function readingTimeOf(doc: unknown): number {
-  const text = bodyTextOf(doc)
-  if (!text) return 0
-  const cjk = (text.match(/[\u4e00-\u9fff]/g) ?? []).length
-  const words = text.replace(/[\u4e00-\u9fff]/g, ' ').trim().split(/\s+/).filter(Boolean).length
-  const minutes = cjk / 350 + words / 200
-  return Math.max(1, Math.ceil(minutes))
+  return numberField(doc, 'readingTime') ?? 0
 }
 
-/** 正文总字数（用于展示） */
+/** 正文总字数（由导入时预计算） */
 export function wordCountOf(doc: unknown): number {
-  const text = bodyTextOf(doc)
-  if (!text) return 0
-  return text.replace(/\s+/g, '').length
+  return numberField(doc, 'words') ?? 0
 }
 
-/** 目录：取 body.toc.links，并拍平成带 depth 的列表供滚动高亮 */
+/** 目录：数据库/接口返回的拍平列表（含 id / text / depth） */
 export function tocOf(doc: unknown): TocItem[] {
-  const body = isRecord(doc) ? doc.body : undefined
-  const toc = isRecord(body) ? body.toc : undefined
-  const links = isRecord(toc) ? toc.links : undefined
-  if (!Array.isArray(links)) return []
+  if (!isRecord(doc)) return []
+  const toc = doc.toc
+  if (!Array.isArray(toc)) return []
 
   const out: TocItem[] = []
-  const walk = (items: unknown[], depth: number): void => {
-    for (const item of items) {
-      if (!isRecord(item)) continue
-      const id = item.id
-      if (typeof id !== 'string') continue
-      const text = typeof item.text === 'string'
-        ? item.text
-        : typeof item.title === 'string' ? item.title : ''
-      out.push({ id, text, depth })
-      if (Array.isArray(item.children)) walk(item.children, depth + 1)
-    }
+  for (const item of toc) {
+    if (!isRecord(item)) continue
+    if (typeof item.id !== 'string' || typeof item.text !== 'string') continue
+    out.push({ id: item.id, text: item.text, depth: typeof item.depth === 'number' ? item.depth : 1 })
   }
-  walk(links, 1)
   return out
 }

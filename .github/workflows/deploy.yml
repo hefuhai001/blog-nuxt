@@ -120,8 +120,7 @@ jobs:
           [ -f "$TARBALL" ] || { echo "错误：未找到上传的源码包 $TARBALL"; exit 1; }
 
           mkdir -p "$APP_DIR"
-          # 解压是覆盖式合并：不会删除服务器上已有文件，
-          # 因此 data/content/contents.sqlite（运行时数据库）不会被清掉
+          # 解压是覆盖式合并：不会删除服务器上已有文件
           tar -xzf "$TARBALL" -C "$APP_DIR"
           cd "$APP_DIR"
 
