@@ -156,11 +156,11 @@ stages:
       hostID:
       - 4bf1e6be-1518-4300-8f44-a04191bea90c
     notify: []
-    strategy:
-      retry: "0"
-      resource:
-        cpu: "2"
-        memory: "2"
+    # 注意：主机部署（deploy@agent）步骤不能带 step 级 strategy / resource！
+    # 否则 Gitee 后端反序列化时字段会同时命中 JobCenterJobData（resource）与
+    # GiteeDeployJobData（hostGroupID / deployArtifact / script），抛出
+    # "Ambiguous BaseJobData payload: fields match more than one host executor type"。
+    # retry 默认为 0、cpu/memory 对主机部署也无意义，去掉无任何功能损失。
 triggers:
   trigger: manual
 notify: []
