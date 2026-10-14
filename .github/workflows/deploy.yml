@@ -1,0 +1,152 @@
+# ============================================================
+# GitHub Actions：代码检查 → 部署到自有主机（Docker Compose）
+#
+# 部署方式：把源码（git archive，仅提交内容）传到服务器，
+#           由服务器执行 docker compose build && up -d。
+#
+# 触发：仅手动（Actions 页面点 "Run workflow"）
+#
+# 需要在仓库 Settings → Secrets and variables → Actions 配置：
+#   DEPLOY_HOST     服务器地址（IP 或域名）
+#   DEPLOY_USER     SSH 登录用户
+#   DEPLOY_SSH_KEY  该用户的私钥（OpenSSH 格式，含 BEGIN/END 行）
+#   DEPLOY_PORT     SSH 端口（可选，默认 22）
+# ============================================================
+name: 部署到自有主机
+
+on:
+  workflow_dispatch:
+
+# 同一时间只允许一个部署在跑，避免并发部署互相覆盖
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "22"
+  # 服务器上的应用目录（首次部署会自动创建；data/ 会持久化保留）
+  DEPLOY_PATH: "~/apps/blog-nuxt"
+
+jobs:
+  # ------------------------------------------------------------
+  # 1. 代码检查：lint + 类型检查，作为部署前的质量门禁
+  # ------------------------------------------------------------
+  check:
+    name: 代码检查
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: 安装 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      # postinstall 会执行 nuxt prepare，生成类型与 .nuxt/eslint.config.mjs
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: ESLint
+        run: pnpm lint
+
+      # 本项目 tsconfig 是 solution-style，必须用 build 模式；--noEmit 会空跑不检查
+      - name: 类型检查
+        run: pnpm exec vue-tsc -b
+
+  # ------------------------------------------------------------
+  # 2. 部署：上传源码 → 服务器构建镜像 → 滚动重启
+  # ------------------------------------------------------------
+  deploy:
+    name: 部署
+    needs: [check]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 只打包「已提交的文件」，天然排除 node_modules / .output / .nuxt / .git
+      - name: 打包源码
+        run: git archive --format=tar.gz -o "$RUNNER_TEMP/deploy.tar.gz" HEAD
+
+      - name: 配置 SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_PORT: ${{ secrets.DEPLOY_PORT }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          # 写入 known_hosts，避免关闭主机密钥校验（比 StrictHostKeyChecking=no 安全）
+          ssh-keyscan -p "${SSH_PORT:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 上传源码到服务器
+        env:
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PORT: ${{ secrets.DEPLOY_PORT }}
+        run: |
+          set -euo pipefail
+          scp -i ~/.ssh/id_deploy -P "${SSH_PORT:-22}" \
+            "$RUNNER_TEMP/deploy.tar.gz" \
+            "$SSH_USER@$SSH_HOST:/tmp/blog-nuxt-deploy.tar.gz"
+
+      - name: 在服务器上构建并重启
+        env:
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PORT: ${{ secrets.DEPLOY_PORT }}
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/id_deploy -p "${SSH_PORT:-22}" "$SSH_USER@$SSH_HOST" \
+            "bash -s -- '${{ env.DEPLOY_PATH }}'" <<'REMOTE'
+          set -euo pipefail
+
+          APP_DIR="${1:-}"
+          [ -n "$APP_DIR" ] || APP_DIR="$HOME/apps/blog-nuxt"
+          # 允许配置成 ~/xxx 形式
+          case "$APP_DIR" in
+            "~"*) APP_DIR="$HOME${APP_DIR#\~}" ;;
+          esac
+
+          TARBALL="/tmp/blog-nuxt-deploy.tar.gz"
+          [ -f "$TARBALL" ] || { echo "错误：未找到上传的源码包 $TARBALL"; exit 1; }
+
+          mkdir -p "$APP_DIR"
+          # 解压是覆盖式合并：不会删除服务器上已有文件，
+          # 因此 data/content/contents.sqlite（运行时数据库）不会被清掉
+          tar -xzf "$TARBALL" -C "$APP_DIR"
+          cd "$APP_DIR"
+
+          [ -f docker-compose.yml ] || { echo "错误：解压后未找到 docker-compose.yml"; ls -la; exit 1; }
+
+          # docker-compose.yml 中 webnet 声明为 external，首次部署需先创建
+          docker network inspect webnet >/dev/null 2>&1 || docker network create webnet
+
+          # docker compose v2 优先，仅有 v1 时自动回退
+          if command -v docker-compose >/dev/null 2>&1 && ! docker compose version >/dev/null 2>&1; then
+            COMPOSE="docker-compose"
+          else
+            COMPOSE="docker compose"
+          fi
+          echo "部署目录：$APP_DIR"
+          echo "使用命令：$COMPOSE"
+
+          # Dockerfile 内部会重新安装依赖并执行 nuxt build
+          $COMPOSE build
+
+          # 滚动更新容器
+          $COMPOSE up -d --remove-orphans
+
+          # 清理悬空镜像，避免服务器磁盘被旧镜像层占满
+          docker image prune -f
+
+          $COMPOSE ps
+          REMOTE
