@@ -105,55 +105,57 @@
 
     <!-- 列表 -->
     <section class="overflow-hidden rounded-2xl border border-(--surface-border) bg-(--surface-strong) shadow-(--shadow-card)">
-      <table class="w-full border-collapse text-left text-sm">
-        <thead>
-          <tr class="border-b border-(--divider) text-[12px] uppercase tracking-wide text-(--text-tertiary)">
-            <th class="px-4 py-3 font-semibold">标题</th>
-            <th class="px-4 py-3 font-semibold max-md:hidden">分类</th>
-            <th class="px-4 py-3 font-semibold max-lg:hidden">字数</th>
-            <th class="px-4 py-3 font-semibold max-lg:hidden">阅读</th>
-            <th class="px-4 py-3 text-right font-semibold">操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="!posts?.length">
-            <td colspan="5" class="px-4 py-8 text-center text-(--text-tertiary)">暂无文章</td>
-          </tr>
-          <tr
-            v-for="post in posts"
-            :key="post.id"
-            class="border-b border-(--divider) transition-colors last:border-0 hover:bg-(--surface-weak)"
-          >
-            <td class="px-4 py-3">
-              <NuxtLink
-                :to="`/blog/${post.slug}`"
-                target="_blank"
-                class="font-semibold text-(--text-primary) transition-colors hover:text-(--accent)"
-              >{{ post.title }}</NuxtLink>
-              <div class="mt-0.5 font-(family-name:--font-mono) text-[11px] text-(--text-tertiary)">{{ post.slug }}</div>
-            </td>
-            <td class="px-4 py-3 text-(--text-secondary) max-md:hidden">{{ post.category || '—' }}</td>
-            <td class="px-4 py-3 text-(--text-secondary) max-lg:hidden">{{ post.words }}</td>
-            <td class="px-4 py-3 text-(--text-secondary) max-lg:hidden">{{ post.readingTime }} 分钟</td>
-            <td class="px-4 py-3 text-right whitespace-nowrap">
-              <button
-                type="button"
-                class="mr-2 rounded-md border border-(--surface-border) px-2.5 py-1 text-[13px] font-semibold text-(--text-secondary) transition-colors hover:text-(--accent)"
-                @click="openEdit(post)"
-              >
-                编辑
-              </button>
-              <button
-                type="button"
-                class="rounded-md border border-(--surface-border) px-2.5 py-1 text-[13px] font-semibold text-(--text-secondary) transition-colors hover:border-(--ios-red)/40 hover:text-(--ios-red)"
-                @click="remove(post)"
-              >
-                删除
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[680px] border-collapse text-left text-sm">
+          <thead>
+            <tr class="border-b border-(--divider) text-[12px] uppercase tracking-wide text-(--text-tertiary)">
+              <th class="px-4 py-3 font-semibold">标题</th>
+              <th class="px-4 py-3 font-semibold">分类</th>
+              <th class="px-4 py-3 font-semibold">字数</th>
+              <th class="px-4 py-3 font-semibold">阅读</th>
+              <th class="px-4 py-3 text-right font-semibold">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!posts?.length">
+              <td colspan="5" class="px-4 py-8 text-center text-(--text-tertiary)">暂无文章</td>
+            </tr>
+            <tr
+              v-for="post in posts"
+              :key="post.id"
+              class="border-b border-(--divider) transition-colors last:border-0 hover:bg-(--surface-weak)"
+            >
+              <td class="px-4 py-3">
+                <NuxtLink
+                  :to="`/blog/${post.slug}`"
+                  target="_blank"
+                  class="font-semibold text-(--text-primary) transition-colors hover:text-(--accent)"
+                >{{ post.title }}</NuxtLink>
+                <div class="mt-0.5 font-(family-name:--font-mono) text-[11px] break-all text-(--text-tertiary)">{{ post.slug }}</div>
+              </td>
+              <td class="px-4 py-3 text-(--text-secondary)">{{ post.category || '—' }}</td>
+              <td class="px-4 py-3 text-(--text-secondary)">{{ post.words }}</td>
+              <td class="px-4 py-3 text-(--text-secondary) whitespace-nowrap">{{ post.readingTime }} 分钟</td>
+              <td class="px-4 py-3 text-right whitespace-nowrap">
+                <button
+                  type="button"
+                  class="mr-2 rounded-md border border-(--surface-border) px-2.5 py-1 text-[13px] font-semibold text-(--text-secondary) transition-colors hover:text-(--accent)"
+                  @click="openEdit(post)"
+                >
+                  编辑
+                </button>
+                <button
+                  type="button"
+                  class="rounded-md border border-(--surface-border) px-2.5 py-1 text-[13px] font-semibold text-(--text-secondary) transition-colors hover:border-(--ios-red)/40 hover:text-(--ios-red)"
+                  @click="remove(post)"
+                >
+                  删除
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
   </div>
 </template>

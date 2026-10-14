@@ -31,8 +31,8 @@
     </datalist>
 
     <!-- 我制作的网站 -->
-    <section class="rounded-2xl border border-(--surface-border) bg-(--surface-strong) p-5 shadow-(--shadow-card)">
-      <div class="mb-4 flex items-center justify-between">
+    <section class="overflow-hidden rounded-2xl border border-(--surface-border) bg-(--surface-strong) shadow-(--shadow-card)">
+      <div class="flex items-center justify-between gap-4 border-b border-(--divider) px-5 py-4">
         <h2 class="m-0 text-base font-bold text-(--text-primary)">
           我制作的网站
         </h2>
@@ -45,37 +45,52 @@
         </button>
       </div>
 
-      <div class="grid gap-4">
-        <div
-          v-for="(site, i) in mySites"
-          :key="`mysite-${i}`"
-          class="grid gap-3 rounded-xl border border-(--divider) bg-(--surface-weak) p-4"
-        >
-          <div class="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
-            <input v-model="site.name" placeholder="名称" class="input">
-            <input v-model="site.url" placeholder="地址（站内以 / 开头，如 /blog）" class="input">
-          </div>
-          <input v-model="site.desc" placeholder="描述" class="input">
-          <div class="grid grid-cols-3 gap-3 max-sm:grid-cols-1">
-            <input v-model="site.repo" placeholder="源码仓库（可选）" class="input">
-            <input v-model="site.icon" list="icon-options" placeholder="图标名，如 CodeXml" class="input">
-            <input v-model="site.tagsText" placeholder="标签，逗号分隔" class="input">
-          </div>
-          <button
-            type="button"
-            class="justify-self-start rounded-md border border-(--surface-border) px-2.5 py-1 text-[13px] font-semibold text-(--text-secondary) transition-colors hover:border-(--ios-red)/40 hover:text-(--ios-red)"
-            @click="mySites.splice(i, 1)"
-          >
-            删除
-          </button>
-        </div>
-        <p v-if="!mySites.length" class="m-0 text-sm text-(--text-tertiary)">暂无数据</p>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[900px] border-collapse text-left text-sm">
+          <thead>
+            <tr class="border-b border-(--divider) text-[12px] uppercase tracking-wide text-(--text-tertiary)">
+              <th class="px-4 py-3 font-semibold">名称</th>
+              <th class="px-4 py-3 font-semibold">地址</th>
+              <th class="px-4 py-3 font-semibold">描述</th>
+              <th class="px-4 py-3 font-semibold">源码</th>
+              <th class="px-4 py-3 font-semibold">图标</th>
+              <th class="px-4 py-3 font-semibold">标签</th>
+              <th class="px-4 py-3 text-right font-semibold">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="!mySites.length">
+              <td colspan="7" class="px-4 py-8 text-center text-(--text-tertiary)">暂无数据</td>
+            </tr>
+            <tr
+              v-for="(site, i) in mySites"
+              :key="`mysite-${i}`"
+              class="border-b border-(--divider) align-top transition-colors last:border-0 hover:bg-(--surface-weak)"
+            >
+              <td class="px-4 py-3"><input v-model="site.name" placeholder="名称" class="input w-full"></td>
+              <td class="px-4 py-3"><input v-model="site.url" placeholder="站内以 / 开头，如 /blog" class="input w-full"></td>
+              <td class="px-4 py-3"><input v-model="site.desc" placeholder="描述" class="input w-full"></td>
+              <td class="px-4 py-3"><input v-model="site.repo" placeholder="可选" class="input w-full"></td>
+              <td class="px-4 py-3"><input v-model="site.icon" list="icon-options" placeholder="如 CodeXml" class="input w-full"></td>
+              <td class="px-4 py-3"><input v-model="site.tagsText" placeholder="逗号分隔" class="input w-full"></td>
+              <td class="px-4 py-3 text-right whitespace-nowrap">
+                <button
+                  type="button"
+                  class="rounded-md border border-(--surface-border) px-2.5 py-1 text-[13px] font-semibold text-(--text-secondary) transition-colors hover:border-(--ios-red)/40 hover:text-(--ios-red)"
+                  @click="mySites.splice(i, 1)"
+                >
+                  删除
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
     <!-- 推荐网站分组 -->
-    <section class="rounded-2xl border border-(--surface-border) bg-(--surface-strong) p-5 shadow-(--shadow-card)">
-      <div class="mb-4 flex items-center justify-between">
+    <section class="grid gap-5">
+      <div class="flex items-center justify-between gap-4">
         <h2 class="m-0 text-base font-bold text-(--text-primary)">
           推荐网站
         </h2>
@@ -88,57 +103,75 @@
         </button>
       </div>
 
-      <div class="grid gap-5">
-        <div
-          v-for="(group, gi) in recommendGroups"
-          :key="`group-${gi}`"
-          class="grid gap-3 rounded-xl border border-(--divider) bg-(--surface-weak) p-4"
-        >
-          <div class="grid grid-cols-[1fr_1fr_auto] items-end gap-3 max-sm:grid-cols-1">
-            <input v-model="group.category" placeholder="分组名称" class="input">
-            <input v-model="group.icon" list="icon-options" placeholder="分组图标名" class="input">
-            <button
-              type="button"
-              class="h-10 rounded-md border border-(--surface-border) px-2.5 text-[13px] font-semibold text-(--text-secondary) transition-colors hover:border-(--ios-red)/40 hover:text-(--ios-red)"
-              @click="recommendGroups.splice(gi, 1)"
-            >
-              删除分组
-            </button>
-          </div>
-
-          <div class="grid gap-3 border-l-2 border-(--divider) pl-3">
-            <div
-              v-for="(link, li) in group.sites"
-              :key="`link-${gi}-${li}`"
-              class="grid gap-3 rounded-lg border border-(--divider) bg-(--surface-strong) p-3"
-            >
-              <div class="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
-                <input v-model="link.name" placeholder="站点名称" class="input">
-                <input v-model="link.url" placeholder="地址" class="input">
-              </div>
-              <input v-model="link.desc" placeholder="描述" class="input">
-              <div class="flex items-center gap-3">
-                <input v-model="link.icon" list="icon-options" placeholder="图标名" class="input flex-1">
-                <button
-                  type="button"
-                  class="h-10 shrink-0 rounded-md border border-(--surface-border) px-2.5 text-[13px] font-semibold text-(--text-secondary) transition-colors hover:border-(--ios-red)/40 hover:text-(--ios-red)"
-                  @click="group.sites.splice(li, 1)"
-                >
-                  删除
-                </button>
-              </div>
-            </div>
-            <button
-              type="button"
-              class="justify-self-start rounded-md border border-(--surface-border) px-2.5 py-1 text-[13px] font-semibold text-(--text-secondary) transition-colors hover:text-(--accent)"
-              @click="group.sites.push({ name: '', desc: '', url: '', icon: '' })"
-            >
-              + 添加站点
-            </button>
-          </div>
+      <div
+        v-for="(group, gi) in recommendGroups"
+        :key="`group-${gi}`"
+        class="overflow-hidden rounded-2xl border border-(--surface-border) bg-(--surface-strong) shadow-(--shadow-card)"
+      >
+        <div class="flex items-center gap-3 border-b border-(--divider) px-4 py-3">
+          <input v-model="group.category" placeholder="分组名称" class="input flex-1">
+          <input v-model="group.icon" list="icon-options" placeholder="分组图标名" class="input flex-1">
+          <button
+            type="button"
+            class="h-10 shrink-0 rounded-md border border-(--surface-border) px-2.5 text-[13px] font-semibold text-(--text-secondary) transition-colors hover:border-(--ios-red)/40 hover:text-(--ios-red)"
+            @click="recommendGroups.splice(gi, 1)"
+          >
+            删除分组
+          </button>
         </div>
-        <p v-if="!recommendGroups.length" class="m-0 text-sm text-(--text-tertiary)">暂无数据</p>
+
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[640px] border-collapse text-left text-sm">
+            <thead>
+              <tr class="border-b border-(--divider) text-[12px] uppercase tracking-wide text-(--text-tertiary)">
+                <th class="px-4 py-3 font-semibold">站点名称</th>
+                <th class="px-4 py-3 font-semibold">地址</th>
+                <th class="px-4 py-3 font-semibold">描述</th>
+                <th class="px-4 py-3 font-semibold">图标</th>
+                <th class="px-4 py-3 text-right font-semibold">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="!group.sites.length">
+                <td colspan="5" class="px-4 py-6 text-center text-(--text-tertiary)">暂无站点</td>
+              </tr>
+              <tr
+                v-for="(link, li) in group.sites"
+                :key="`link-${gi}-${li}`"
+                class="border-b border-(--divider) align-top transition-colors last:border-0 hover:bg-(--surface-weak)"
+              >
+                <td class="px-4 py-3"><input v-model="link.name" placeholder="站点名称" class="input w-full"></td>
+                <td class="px-4 py-3"><input v-model="link.url" placeholder="地址" class="input w-full"></td>
+                <td class="px-4 py-3"><input v-model="link.desc" placeholder="描述" class="input w-full"></td>
+                <td class="px-4 py-3"><input v-model="link.icon" list="icon-options" placeholder="图标名" class="input w-full"></td>
+                <td class="px-4 py-3 text-right whitespace-nowrap">
+                  <button
+                    type="button"
+                    class="rounded-md border border-(--surface-border) px-2.5 py-1 text-[13px] font-semibold text-(--text-secondary) transition-colors hover:border-(--ios-red)/40 hover:text-(--ios-red)"
+                    @click="group.sites.splice(li, 1)"
+                  >
+                    删除
+                  </button>
+                </td>
+              </tr>
+              <tr class="border-t border-(--divider)">
+                <td colspan="5" class="px-4 py-3">
+                  <button
+                    type="button"
+                    class="rounded-md border border-(--surface-border) px-2.5 py-1 text-[13px] font-semibold text-(--text-secondary) transition-colors hover:text-(--accent)"
+                    @click="group.sites.push({ name: '', desc: '', url: '', icon: '' })"
+                  >
+                    + 添加站点
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+      <p v-if="!recommendGroups.length" class="m-0 rounded-2xl border border-(--surface-border) bg-(--surface-strong) px-5 py-8 text-center text-sm text-(--text-tertiary) shadow-(--shadow-card)">
+        暂无数据
+      </p>
     </section>
   </div>
 </template>

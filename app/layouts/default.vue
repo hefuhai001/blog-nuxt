@@ -80,6 +80,21 @@
             <Search class="size-4" aria-hidden="true" />
           </button>
           <ThemeToggle />
+          <!-- 登录 / 账号入口（右上角） -->
+          <NuxtLink
+            v-if="currentUser"
+            :to="accountLink"
+            class="hidden h-9 items-center gap-1.5 rounded-full border border-(--surface-border) bg-(--surface-weak) px-4 text-[13px] font-semibold text-(--text-secondary) transition-colors duration-200 hover:border-(--accent-soft) hover:text-(--accent) md:inline-flex"
+          >
+            <User class="size-4" aria-hidden="true" />{{ accountLabel }}
+          </NuxtLink>
+          <NuxtLink
+            v-else
+            to="/login"
+            class="hidden h-9 items-center gap-2 rounded-full border border-(--surface-border) bg-(--surface-weak) px-4 text-[13px] font-semibold text-(--text-secondary) transition-colors duration-200 hover:border-(--accent-soft) hover:text-(--accent) md:inline-flex"
+          >
+            <User class="size-4" aria-hidden="true" />登录
+          </NuxtLink>
         </div>
       </div>
 
@@ -97,6 +112,15 @@
                 @click="mobileMenuOpen = false"
               >
                 <component :is="item.icon" class="size-4.5" aria-hidden="true" />{{ item.label }}
+              </NuxtLink>
+            </li>
+            <li>
+              <NuxtLink
+                :to="currentUser ? accountLink : '/login'"
+                class="flex h-11 items-center gap-3 rounded-xl px-4 text-[15px] font-semibold text-(--text-secondary) transition-colors duration-150 hover:bg-(--surface-weak) hover:text-(--text-primary) router-link-active:bg-(--accent-soft) router-link-active:text-(--accent)"
+                @click="mobileMenuOpen = false"
+              >
+                <User class="size-4.5" aria-hidden="true" />{{ currentUser ? accountLabel : '登录' }}
               </NuxtLink>
             </li>
           </ul>
@@ -127,13 +151,19 @@
 </template>
 
 <script setup lang="ts">
-import { BookOpen, Compass, Globe, Home, Menu, Search, X, Zap } from '@lucide/vue'
+import { BookOpen, Compass, Globe, Home, Menu, Search, User, X, Zap } from '@lucide/vue'
 import { useCommandPalette } from '~/composables/command-palette'
 
 useHead({ htmlAttrs: { lang: 'zh-CN' } })
 
 const route = useRoute()
 const mobileMenuOpen = ref(false)
+
+// 当前登录用户（用于右上角登录 / 账号入口，未登录为 null）
+const { data: me } = await useFetch<{ user: { name: string; nickname: string; role: 'admin' | 'user' } | null }>('/api/auth/me')
+const currentUser = computed(() => me.value?.user ?? null)
+const accountLink = computed(() => currentUser.value?.role === 'admin' ? '/admin' : '/account')
+const accountLabel = computed(() => currentUser.value?.nickname || currentUser.value?.name || '个人中心')
 
 const mobileLinks = [
   { to: '/', label: '首页', icon: Home },
