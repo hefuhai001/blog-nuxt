@@ -7,6 +7,9 @@ export default defineNuxtConfig({
     '@nuxtjs/color-mode',
     '@vite-pwa/nuxt',
     '@nuxt/eslint',
+    '@nuxt/hints',
+    '@nuxt/image', 
+    '@nuxt/ui'
   ],
   content: {
     // 开发/构建期的本地数据库统一落到 data/（不再使用 .data）
