@@ -9,6 +9,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "content:import": "node scripts/import-content.mjs",
+    "sites:import": "node scripts/import-sites.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },

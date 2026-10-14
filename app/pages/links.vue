@@ -4,7 +4,7 @@ import { resolveSiteIcon, type SitesData } from '~/data/sites'
 
 useHead({ title: '网址导航 · CodeTrail 代码轨迹' })
 
-// 站点导航数据：运行时从 /api/sites 读取（数据源为可挂载的 data/sites.json）
+// 站点导航数据：运行时从 /api/sites 读取（数据源为 MySQL）
 const { data: sites } = await useFetch<SitesData>('/api/sites', { key: 'sites-nav' })
 const mySites = computed(() => sites.value?.mySites ?? [])
 const recommendGroups = computed(() => sites.value?.recommendGroups ?? [])

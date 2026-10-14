@@ -42,10 +42,7 @@ ENV HOST=0.0.0.0
 # 拷贝 Nuxt/Nitro 构建产物
 COPY --from=builder /app/.output ./.output
 
-# 站点导航数据默认值（运行时可被挂载覆盖，见 docker-compose.yml）
-COPY --from=builder /app/data ./data
-
-# gosu（Debian 下 su-exec 的等价物）：供入口脚本以 root 修正 /app/data 属主后降权到 node 用户运行
+# gosu（Debian 下 su-exec 的等价物）：供入口脚本以 root 降权到 node 用户运行
 # 使用国内 Debian 镜像源（阿里云），加速 apt 下载
 RUN set -eux; \
     if [ -f /etc/apt/sources.list.d/debian.sources ]; then \
@@ -63,8 +60,7 @@ COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \
     && chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# 入口脚本负责确保 /app/data 可写（兼容 bind 挂载 / named volume / 历史遗留卷）并降权到 node，
-# 因此不再设置 USER node（须以 root 启动才能 chown）
+# 入口脚本以 root 降权到 node 用户运行，因此不再设置 USER node
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 3000

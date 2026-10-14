@@ -8,7 +8,7 @@ import {
 /**
  * 站点导航数据结构定义与图标解析。
  *
- * 实际的站点数据已抽离到运行时可挂载的 JSON 文件（默认 ./data/sites.json），
+ * 实际的站点数据存于本地 MySQL（db_blog_nuxt 的 nav_sites / nav_groups / nav_links 表），
  * 由服务端接口 /api/sites 读取后返回；此文件只保留类型与图标映射。
  */
 

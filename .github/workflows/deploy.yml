@@ -24,7 +24,7 @@ concurrency:
 
 env:
   NODE_VERSION: "22"
-  # 服务器上的应用目录（首次部署会自动创建；data/ 会持久化保留）
+  # 服务器上的应用目录（首次部署会自动创建）
   DEPLOY_PATH: "~/apps/blog-nuxt"
 
 jobs:

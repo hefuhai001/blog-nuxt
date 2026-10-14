@@ -54,10 +54,10 @@ stages:
     - pnpm install --frozen-lockfile
     - "# 先在 CI 侧验证生产构建能过（真正的镜像构建在服务器上由 docker compose build 执行）"
     - pnpm build
-    - "# 清理构建期产物与运行时数据，只把「源码 + Docker 部署文件」打进制品："
+    - "# 清理构建期产物，只把「源码 + Docker 部署文件」打进制品："
     - "#   node_modules / .output / .nuxt / .cache 会在服务器 docker build 时重新生成；"
-    - "#   data/content 是运行时 SQLite 数据库，绝不能覆盖服务器上的持久化数据"
-    - rm -rf node_modules .output .nuxt .cache .data data/content
+    - "#   内容与网址导航数据均存于外部 MySQL，已不随仓库分发"
+    - rm -rf node_modules .output .nuxt .cache .data
     artifacts:
     - name: BUILD_ARTIFACT
       path:

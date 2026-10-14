@@ -32,6 +32,36 @@ export interface PageDetail {
   updatedAt: string
 }
 
+/** 我制作的网站 / 项目 */
+export interface MySite {
+  name: string
+  desc: string
+  url: string
+  repo?: string
+  icon: string
+  tags: string[]
+}
+
+/** 我推荐的网站 */
+export interface RecommendSite {
+  name: string
+  desc: string
+  url: string
+  icon: string
+}
+
+export interface RecommendGroup {
+  category: string
+  icon: string
+  sites: RecommendSite[]
+}
+
+/** /api/sites 返回的数据结构 */
+export interface SitesData {
+  mySites: MySite[]
+  recommendGroups: RecommendGroup[]
+}
+
 export function getPool(): mysql.Pool {
   if (!pool) {
     const db = useRuntimeConfig().db
@@ -71,6 +101,39 @@ async function createSchema(): Promise<void> {
     body_md    LONGTEXT     NOT NULL,
     updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (path)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+  // 网址导航：我制作的网站（nav_sites）、推荐网站分组（nav_groups）与组内站点（nav_links）
+  await p.query(`CREATE TABLE IF NOT EXISTS nav_sites (
+    id          INT          NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(255) NOT NULL,
+    description VARCHAR(1024) NOT NULL DEFAULT '',
+    url         VARCHAR(1024) NOT NULL,
+    repo        VARCHAR(1024) NOT NULL DEFAULT '',
+    icon        VARCHAR(64)  NOT NULL DEFAULT '',
+    tags        TEXT         NOT NULL,
+    sort_order  INT          NOT NULL DEFAULT 0,
+    updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+  await p.query(`CREATE TABLE IF NOT EXISTS nav_groups (
+    id         INT          NOT NULL AUTO_INCREMENT,
+    category   VARCHAR(255) NOT NULL,
+    icon       VARCHAR(64)  NOT NULL DEFAULT '',
+    sort_order INT          NOT NULL DEFAULT 0,
+    updated_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
+  await p.query(`CREATE TABLE IF NOT EXISTS nav_links (
+    id          INT          NOT NULL AUTO_INCREMENT,
+    group_id    INT          NOT NULL,
+    name        VARCHAR(255) NOT NULL,
+    description VARCHAR(1024) NOT NULL DEFAULT '',
+    url         VARCHAR(1024) NOT NULL,
+    icon        VARCHAR(64)  NOT NULL DEFAULT '',
+    sort_order  INT          NOT NULL DEFAULT 0,
+    updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_group (group_id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`)
 }
 
@@ -142,5 +205,79 @@ export async function getPage(path: string): Promise<PageDetail | null> {
       bodyMd: String(row.body_md),
       updatedAt: new Date(row.updated_at).toISOString(),
     }
+  })
+}
+
+interface NavSiteRow extends mysql.RowDataPacket {
+  name: string
+  description: string
+  url: string
+  repo: string
+  icon: string
+  tags: string
+}
+
+interface NavGroupRow extends mysql.RowDataPacket {
+  id: number
+  category: string
+  icon: string
+}
+
+interface NavLinkRow extends mysql.RowDataPacket {
+  group_id: number
+  name: string
+  description: string
+  url: string
+  icon: string
+}
+
+/** 网址导航数据：我制作的网站 + 推荐网站分组 */
+export async function getSites(): Promise<SitesData> {
+  return withDb(async (p) => {
+    const [siteRows] = await p.query<NavSiteRow[]>(
+      'SELECT name, description, url, repo, icon, tags FROM nav_sites ORDER BY sort_order ASC, id ASC',
+    )
+    const mySites: MySite[] = siteRows.map((row) => {
+      let tags: string[] = []
+      try {
+        const parsed = JSON.parse(row.tags || '[]')
+        if (Array.isArray(parsed)) tags = parsed.map(String)
+      }
+      catch { /* 解析失败则视为无标签 */ }
+      return {
+        name: String(row.name),
+        desc: String(row.description ?? ''),
+        url: String(row.url),
+        repo: row.repo ? String(row.repo) : undefined,
+        icon: String(row.icon ?? ''),
+        tags,
+      }
+    })
+
+    const [groupRows] = await p.query<NavGroupRow[]>(
+      'SELECT id, category, icon FROM nav_groups ORDER BY sort_order ASC, id ASC',
+    )
+    const [linkRows] = await p.query<NavLinkRow[]>(
+      'SELECT group_id, name, description, url, icon FROM nav_links ORDER BY sort_order ASC, id ASC',
+    )
+    const linksByGroup = new Map<number, RecommendSite[]>()
+    for (const row of linkRows) {
+      const list = linksByGroup.get(Number(row.group_id)) ?? []
+      list.push({
+        name: String(row.name),
+        desc: String(row.description ?? ''),
+        url: String(row.url),
+        icon: String(row.icon ?? ''),
+      })
+      linksByGroup.set(Number(row.group_id), list)
+    }
+
+    const recommendGroups: RecommendGroup[] = groupRows.map((row) => ({
+      category: String(row.category),
+      icon: String(row.icon ?? ''),
+      sites: linksByGroup.get(Number(row.id)) ?? [],
+    }))
+
+    return { mySites, recommendGroups }
   })
 }

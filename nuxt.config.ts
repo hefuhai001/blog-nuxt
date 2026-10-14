@@ -33,9 +33,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   compatibilityDate: '2024-04-03',
   runtimeConfig: {
-    // 站点导航数据文件路径；可通过挂载覆盖，或用环境变量 NUXT_SITES_FILE 指定
-    sitesFile: './data/sites.json',
-    // 内容数据库（本地 MySQL）；可用环境变量覆盖：
+    // 内容与网址导航数据都存于本地 MySQL；可用环境变量覆盖：
     // NUXT_DB_HOST / NUXT_DB_PORT / NUXT_DB_USER / NUXT_DB_PASSWORD / NUXT_DB_DATABASE
     db: {
       host: 'localhost',
