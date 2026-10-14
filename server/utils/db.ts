@@ -281,3 +281,184 @@ export async function getSites(): Promise<SitesData> {
     return { mySites, recommendGroups }
   })
 }
+
+/** 写入/更新文章所需字段 */
+export interface PostInput {
+  id: string
+  slug: string
+  category: string
+  title: string
+  description?: string
+  bodyMd: string
+}
+
+/** 写入/更新文章：现算 plain_text/word_count/reading_time，返回刷新后的详情 */
+export async function upsertPost(input: PostInput): Promise<PostDetail> {
+  const { text, words, readingTime } = renderMarkdown(input.bodyMd)
+  const description = (input.description ?? '').trim() || text.slice(0, 120)
+  await withDb(async (p) => {
+    await p.execute(
+      `INSERT INTO posts (id, slug, category, title, description, body_md, plain_text, word_count, reading_time)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE slug=VALUES(slug), category=VALUES(category), title=VALUES(title),
+         description=VALUES(description), body_md=VALUES(body_md), plain_text=VALUES(plain_text),
+         word_count=VALUES(word_count), reading_time=VALUES(reading_time)`,
+      [input.id, input.slug, input.category, input.title, description, input.bodyMd, text, words, readingTime],
+    )
+  })
+  const detail = await getPost(input.id)
+  if (!detail) throw new Error(`[db] 文章写入后无法读回：${input.id}`)
+  return detail
+}
+
+/** 删除文章，返回是否删除了记录 */
+export async function deletePost(id: string): Promise<boolean> {
+  return withDb(async (p) => {
+    const [result] = await p.execute<mysql.ResultSetHeader>('DELETE FROM posts WHERE id = ?', [id])
+    return result.affectedRows > 0
+  })
+}
+
+/** 写入/更新页面所需字段 */
+export interface PageInput {
+  path: string
+  title: string
+  bodyMd: string
+}
+
+/** 写入/更新页面，返回刷新后的详情 */
+export async function upsertPage(input: PageInput): Promise<PageDetail> {
+  const title = input.title.trim()
+  await withDb(async (p) => {
+    await p.execute(
+      `INSERT INTO pages (path, title, body_md) VALUES (?, ?, ?)
+       ON DUPLICATE KEY UPDATE title=VALUES(title), body_md=VALUES(body_md)`,
+      [input.path, title, input.bodyMd],
+    )
+  })
+  const detail = await getPage(input.path)
+  if (!detail) throw new Error(`[db] 页面写入后无法读回：${input.path}`)
+  return detail
+}
+
+/** 删除页面，返回是否删除了记录 */
+export async function deletePage(path: string): Promise<boolean> {
+  return withDb(async (p) => {
+    const [result] = await p.execute<mysql.ResultSetHeader>('DELETE FROM pages WHERE path = ?', [path])
+    return result.affectedRows > 0
+  })
+}
+
+/** 页面列表（不含正文） */
+export async function listPages(): Promise<Array<{ path: string; title: string; updatedAt: string }>> {
+  return withDb(async (p) => {
+    const [rows] = await p.query<(mysql.RowDataPacket & { path: string; title: string; updated_at: Date })[]>(
+      'SELECT path, title, updated_at FROM pages ORDER BY path ASC',
+    )
+    return rows.map((row) => ({
+      path: String(row.path),
+      title: String(row.title ?? ''),
+      updatedAt: new Date(row.updated_at).toISOString(),
+    }))
+  })
+}
+
+/** 全量重写网址导航：事务内 DELETE + INSERT，保证读者不会看到中间空状态 */
+export async function replaceNav(data: SitesData): Promise<void> {
+  return withDb(async (p) => {
+    const conn = await p.getConnection()
+    try {
+      await conn.beginTransaction()
+      await conn.query('DELETE FROM nav_links')
+      await conn.query('DELETE FROM nav_groups')
+      await conn.query('DELETE FROM nav_sites')
+
+      const mySites = Array.isArray(data.mySites) ? data.mySites : []
+      const groups = Array.isArray(data.recommendGroups) ? data.recommendGroups : []
+
+      let siteOrder = 0
+      for (const site of mySites) {
+        await conn.execute(
+          'INSERT INTO nav_sites (name, description, url, repo, icon, tags, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [
+            String(site.name ?? ''),
+            String(site.desc ?? ''),
+            String(site.url ?? ''),
+            String(site.repo ?? ''),
+            String(site.icon ?? ''),
+            JSON.stringify(Array.isArray(site.tags) ? site.tags : []),
+            siteOrder++,
+          ],
+        )
+      }
+
+      let groupOrder = 0
+      for (const group of groups) {
+        const [result] = await conn.execute<mysql.ResultSetHeader>(
+          'INSERT INTO nav_groups (category, icon, sort_order) VALUES (?, ?, ?)',
+          [String(group.category ?? ''), String(group.icon ?? ''), groupOrder++],
+        )
+        const groupId = result.insertId
+        let linkOrder = 0
+        const links = Array.isArray(group.sites) ? group.sites : []
+        for (const link of links) {
+          await conn.execute(
+            'INSERT INTO nav_links (group_id, name, description, url, icon, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
+            [
+              groupId,
+              String(link.name ?? ''),
+              String(link.desc ?? ''),
+              String(link.url ?? ''),
+              String(link.icon ?? ''),
+              linkOrder++,
+            ],
+          )
+        }
+      }
+
+      await conn.commit()
+    }
+    catch (error) {
+      await conn.rollback()
+      throw error
+    }
+    finally {
+      conn.release()
+    }
+  })
+}
+
+/** 后台概览计数 */
+export async function getStats(): Promise<{
+  posts: number
+  pages: number
+  navSites: number
+  navGroups: number
+  navLinks: number
+}> {
+  interface StatsRow extends mysql.RowDataPacket {
+    posts: number
+    pages: number
+    navSites: number
+    navGroups: number
+    navLinks: number
+  }
+  return withDb(async (p) => {
+    const [rows] = await p.query<StatsRow[]>(
+      `SELECT
+         (SELECT COUNT(*) FROM posts)      AS posts,
+         (SELECT COUNT(*) FROM pages)      AS pages,
+         (SELECT COUNT(*) FROM nav_sites)  AS navSites,
+         (SELECT COUNT(*) FROM nav_groups) AS navGroups,
+         (SELECT COUNT(*) FROM nav_links)  AS navLinks`,
+    )
+    const row = rows[0]
+    return {
+      posts: Number(row?.posts ?? 0),
+      pages: Number(row?.pages ?? 0),
+      navSites: Number(row?.navSites ?? 0),
+      navGroups: Number(row?.navGroups ?? 0),
+      navLinks: Number(row?.navLinks ?? 0),
+    }
+  })
+}

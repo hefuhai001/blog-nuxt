@@ -33,6 +33,12 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   compatibilityDate: '2024-04-03',
   runtimeConfig: {
+    // 管理后台默认账号：生产务必用环境变量覆盖
+    // NUXT_ADMIN_USER / NUXT_ADMIN_PASSWORD
+    adminUser: 'admin',
+    adminPassword: 'admin123',
+    // 会话加密密钥（iron 要求 >= 32 字符）：生产必须设置 NUXT_SESSION_PASSWORD
+    sessionPassword: 'codetrail-dev-session-secret-change-me-in-production-2026',
     // 内容与网址导航数据都存于本地 MySQL；可用环境变量覆盖：
     // NUXT_DB_HOST / NUXT_DB_PORT / NUXT_DB_USER / NUXT_DB_PASSWORD / NUXT_DB_DATABASE
     db: {
